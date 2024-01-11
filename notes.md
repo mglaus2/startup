@@ -1,8 +1,8 @@
 # Notes for CS 260
 
 ## Links to Note Sections
-[Read Me](README.md)
-[Writing Documentation in Github](https://docs.github.com/en/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax#section-links)
+1. [Read Me](README.md)
+1. [Writing Documentation in Github](https://docs.github.com/en/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax)
 
 ## Git and Github
 - You can create alias and create custom commands for git
