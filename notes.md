@@ -13,8 +13,8 @@
 ```
 git add . (Adds all changes to staged section)
 git commit -m "message" (Adds all changes to git file)
-git push (pushes files into github)
 git pull (pulls files from github)
+git push (pushes files into github)
 git status (shows currently modified files)
 git branch (gets current branch)
 git checkout <branch_name> (changes current branch to branch_name)
