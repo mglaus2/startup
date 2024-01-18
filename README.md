@@ -5,8 +5,7 @@
 Have you ever wanted to play battleship with a friend but did not have the game with you? Or maybe you were too far away to play in person? Online battleship allows you to play a game of battleship with a friend over the internet. Players are able to place thier ships and then take turns trying to sink each others ships. See if you are the best naval commander between all of your friends!
 
 ### Design
-![Design Image](/specificationDesign.jpg)
-<img src="/specificationDesign.jpg" alt="Alt Text" width="200"/>
+<img src="/specificationDesign.jpg" alt="Design Image" width="350"/>
 
 ### Key Features
 - Secure login over HTTPS
