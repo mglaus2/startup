@@ -6,6 +6,7 @@ Have you ever wanted to play battleship with a friend but did not have the game 
 
 ### Design
 ![Design Image](/specificationDesign.jpg)
+<img src="/specificationDesign.jpg" alt="Alt Text" width="200"/>
 
 ### Key Features
 - Secure login over HTTPS
