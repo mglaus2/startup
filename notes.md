@@ -28,9 +28,9 @@ SSH Command - ssh -i [key pair file] ubuntu@[ip address]
 
 ## HTML
 - inside body it is seperated into 3 sections (header, main, footer)
-- `&lt;element_name&gt;` - tags that contain elements inside of them
+- `<element_name>` - tags that contain elements inside of them
 - html element represents top level page structure
 - id attribute makes it a variable that can be referenced
 - class associates it to a class that can be used in CSS
 - a href="url" - element for referencing a url
-- `&lt;span&gt;` - used to apply styles to a element (can assign class so CSS can reference)
+- `<span>` - used to apply styles to a element (can assign class so CSS can reference)
