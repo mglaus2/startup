@@ -36,4 +36,4 @@ For this deliverable I built out the structure of my application using HTML.
 - **3rd-Party API** - I will be calling the Colormind API to get a contrasting color from the battleship boards background color. This allows the user to play around with different color options and find contrasting colors while waiting for their opponents turn.
 - **Images** - Victory and defeat images (victory image is used in dummy data). This image will overlay the board depending on if you win or lose.
 - **DB/Login** - Input box and submit button for login. The personal leaderboard represents data pulled from the database.
-- **WebSocket** - Players will connect to each other using WebSocket. Also, the battlship game will be updated in real-time by using a WebSocket.
+- **WebSocket** - Players will connect to each other using WebSocket. Also, the battleship board will be updated in real-time by using a WebSocket.
