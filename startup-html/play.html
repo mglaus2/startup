@@ -20,7 +20,7 @@
     </header>
 
     <main>
-      <h1 id="boardTitle">Player's Board</h1>
+      <h1 id="boardTitle">Mystery Player's Board</h1>
       <!-- I will use CSS grid to create the board and Javascript to fill in the contents of the board, therefore I did not want to overload with dummy data -->
       <table>
         <tr>
@@ -48,7 +48,7 @@
           <td>O</td>
         </tr>
         <tr>
-          <td>O</td>
+          <td>X</td>
           <td>O</td>
           <td>O</td>
           <td>O</td>
@@ -61,7 +61,7 @@
         </tr>
         <tr>
           <td>X</td>
-          <td>X</td>
+          <td>O</td>
           <td>O</td>
           <td>O</td>
           <td>O</td>
@@ -72,6 +72,19 @@
           <td>O</td>
         </tr>
       </table>
+
+      <br />
+      <h3>Pick Colors:</h3>
+      <div>
+        <label for="backgroundColor">Background Color:</label>
+        <input type="color" id="backgroundColor" value="#000080">
+      </div>
+      <div>
+        <label for="shipColor">Ship Color:</label>
+        <input type="color" id="shipColor" value="#FF0000">
+      </div>
+      <br />
+      <button>Generate Contrasting Color</button>
     </main>
 
     <footer>

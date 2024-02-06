@@ -6,6 +6,7 @@
 }
 
 td {
-    border: 1px solid black;
+    background-color: #000080;
+    color: #FF0000;
     padding: 10px;
 }
