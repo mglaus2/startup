@@ -27,3 +27,8 @@ I am going to use the required technologies in the following ways:
 - **DB/Login** - Stores users, game instances, and game history. Register and login users. Credentials securely stored in database. Can't play unless authenticated.
 - **WebSocket** - Connection between players, real-time grid updates, and turn switching.
 - **React** - Application ported to use the React web framework.
+
+## HTML Deliverable
+For this deliverable I built out the structure of my application using HTML.
+- **HTML** - Four HTML Pages that represent logining in, creating/joining a game, playing the game, and the users personal leaderboard.
+- **Links** - 
