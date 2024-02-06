@@ -34,6 +34,6 @@ For this deliverable I built out the structure of my application using HTML.
 - **Links** - The login Page automatically goes to the create/join game page and that page goes to the current game page when the information is filled out and the button is clicked. Then all pages are connected through a navigation menu.
 - **Text** - I am not exactly sure what this is looking for but logging in with your username, password, and creating/joining games ask for input as text in there respective forms. Also, the leaderboard is written in text.
 - **3rd-Party API** - I will be calling the Colormind API to get a contrasting color from the battleship boards background color. This allows the user to play around with different color options and find contrasting colors while waiting for their opponents turn.
-- **Images** - Victory and defeat images (victory image is used in dummy data). This image will overlay the board depending on if you win or lose.
+- **Images** - Victory and defeat images (defeat image is used in dummy data). This image will overlay the board depending on if you win or lose.
 - **DB/Login** - Input box and submit button for login. The personal leaderboard represents data pulled from the database.
 - **WebSocket** - Players will connect to each other using WebSocket. Also, the battleship board will be updated in real-time by using a WebSocket.
