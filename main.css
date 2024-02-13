@@ -38,11 +38,11 @@ menu .nav-item {
 
 header .navbar-brand {
     margin: 15px 0.5em 0 1em;
-    color: #ffc13b; /* Page Title Color */
+    color: #f5f0e1; /* Page Title Color */
 }
 
 header .navbar-brand:hover {
-    color: #ff6e40; /* Page Title Color */
+    color: #f5f0e1; /* Page Title Color */
 }
 
 .navbar-nav .nav-link {
