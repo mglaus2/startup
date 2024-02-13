@@ -1,3 +1,70 @@
+body {
+    display: flex;
+    flex-direction: column;
+    min-width: 375px;
+}
+
+header {
+    flex: 0 80px;
+    background-color: #FEE715; /* Header Color */
+}
+
+main {
+    flex: 1 calc(100vh - 120px);
+}
+
+footer {
+    flex: 0 40px;
+    background-color: #763626; /* Footer Color */
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+menu {
+    flex: 1;
+    display: flex;
+    flex-direction: row !important;
+    list-style: none;
+}
+
+header .navbar-brand {
+    margin: 15px 0.5em 0 1em;
+    color: red; /* Page Title Color */
+}
+
+body.bg-dark {
+    background-color: #f5f0e1 !important; /* Body Color */
+}
+
+menu .nav-item {
+    margin: 0 0.5em;
+}
+
+.navbar-nav .nav-link {
+    color: red; /* Inactive Page Link Color */
+}
+
+.navbar-nav .nav-item .nav-link.active {
+    color: yellow; /* Active Page Link Color */
+}
+
+footer a {
+    float: right;
+    padding-right: 1em;
+}
+
+.text-reset {
+    padding-left: 1em;
+}
+
+h1 {
+    color: #1e3d59; /* Body Text Color */
+}
+
+
+
+
 #board {
     display: grid;
     grid-template-columns: repeat(10, 40px);
