@@ -6,7 +6,7 @@ body {
 
 header {
     flex: 0 80px;
-    background-color: #FEE715; /* Header Color */
+    background-color: #1e3d59 /* Header Color */
 }
 
 main {
@@ -15,7 +15,7 @@ main {
 
 footer {
     flex: 0 40px;
-    background-color: #763626; /* Footer Color */
+    background-color: #1e3d59; /* Footer Color */
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -28,30 +28,43 @@ menu {
     list-style: none;
 }
 
-header .navbar-brand {
-    margin: 15px 0.5em 0 1em;
-    color: red; /* Page Title Color */
-}
-
 body.bg-dark {
-    background-color: #f5f0e1 !important; /* Body Color */
+    background-color: #e5e5dc !important; /* Body Color */
 }
 
 menu .nav-item {
     margin: 0 0.5em;
 }
 
+header .navbar-brand {
+    margin: 15px 0.5em 0 1em;
+    color: #ffc13b; /* Page Title Color */
+}
+
+header .navbar-brand:hover {
+    color: #ff6e40; /* Page Title Color */
+}
+
 .navbar-nav .nav-link {
-    color: red; /* Inactive Page Link Color */
+    color: #ffc13b; /* Inactive Page Link Color */
+}
+
+.navbar-nav .nav-link:hover {
+    color: #ff6e40; /* Inactive Page Link Hover Color */
 }
 
 .navbar-nav .nav-item .nav-link.active {
-    color: yellow; /* Active Page Link Color */
+    color: #f5f0e1; /* Active Page Link Color */
+}
+
+footer.text-dark {
+    color: #ffc13b !important; /* Footer Text Color */
 }
 
 footer a {
     float: right;
     padding-right: 1em;
+    color: #ffc13b; /* Footer Github URL Color */
 }
 
 .text-reset {
@@ -59,7 +72,7 @@ footer a {
 }
 
 h1 {
-    color: #1e3d59; /* Body Text Color */
+    color: #ff6e40; /* Body Text Color */
 }
 
 
