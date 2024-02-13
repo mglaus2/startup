@@ -1,0 +1,12 @@
+#board {
+    display: grid;
+    grid-template-columns: repeat(10, 40px);
+    grid-template-rows: repeat(10, 40px);
+    gap: 5px;
+}
+
+td {
+    background-color: #000080;
+    color: #FF0000;
+    padding: 10px;
+}

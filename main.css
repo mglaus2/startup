@@ -4,18 +4,21 @@ body {
     min-width: 375px;
 }
 
+body.bg-dark {
+    background-color: #1e3d59 !important; /* Body Color */
+}
+
 header {
     flex: 0 80px;
-    background-color: #1e3d59 /* Header Color */
 }
 
 main {
     flex: 1 calc(100vh - 120px);
+    background-color: #e5e5dc; /* Main Color */
 }
 
 footer {
     flex: 0 40px;
-    background-color: #1e3d59; /* Footer Color */
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -28,16 +31,12 @@ menu {
     list-style: none;
 }
 
-body.bg-dark {
-    background-color: #e5e5dc !important; /* Body Color */
-}
-
 menu .nav-item {
-    margin: 0 0.5em;
+    margin: 0 0.3em;
 }
 
 header .navbar-brand {
-    margin: 15px 0.5em 0 1em;
+    margin: 15px 0.5em 0 0.5em;
     color: #f5f0e1; /* Page Title Color */
 }
 
@@ -75,18 +74,24 @@ h1 {
     color: #ff6e40; /* Body Text Color */
 }
 
-
-
-
-#board {
-    display: grid;
-    grid-template-columns: repeat(10, 40px);
-    grid-template-rows: repeat(10, 40px);
-    gap: 5px;
+@media (max-height: 600px) {
+    header {
+        display: none;
+    }
+    footer {
+        display: none;
+    }
+    main {
+        flex: 1 100vh;
+    }
 }
 
-td {
-    background-color: #000080;
-    color: #FF0000;
-    padding: 10px;
+@media (max-width: 475px) {
+    menu .nav-item {
+        font-size: 0.8rem;
+    }
+
+    header .navbar-brand {
+        font-size: 0.8rem;
+    }
 }
