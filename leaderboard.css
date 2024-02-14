@@ -1,0 +1,33 @@
+main {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+main h1 {
+    margin-bottom: 3vh;
+}
+
+main h3 {
+    margin-bottom: 1vh;
+}
+
+table {
+    max-width: 600px;
+}
+
+th {
+    color: #ffc13b;
+}
+
+/* sets the header color */
+thead tr {
+    background-color: #1e3d59;
+}
+
+.table th,
+.table td {
+    border: 1px solid black;
+    padding: 8px;
+}
