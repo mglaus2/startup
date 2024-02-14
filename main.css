@@ -2,9 +2,8 @@ body {
     display: flex;
     flex-direction: column;
     min-width: 375px;
-}
-
-body.bg-dark {
+    margin: 0;
+    padding: 0;
     background-color: #1e3d59 !important; /* Body Color */
 }
 
@@ -15,6 +14,11 @@ header {
 main {
     flex: 1 calc(100vh - 120px);
     background-color: #e5e5dc; /* Main Color */
+    color: #ff6e40; /* Body Text Color */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
 }
 
 footer {
@@ -68,10 +72,6 @@ footer a {
 
 .text-reset {
     padding-left: 1em;
-}
-
-h1 {
-    color: #ff6e40; /* Body Text Color */
 }
 
 @media (max-height: 600px) {
