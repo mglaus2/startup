@@ -49,4 +49,4 @@ For this deliverable I built out the structure of my application using HTML.
 [x] - done - 10% Responsive to window resizing. Looks great on iPad, desktop, and iPhone.  
 [x] - done - 20% Application elements. Navigation and buttons are using bootstrap.  
 [x] - done - 10% Application text content. Text is displaying in Helvetica font.  
-[] - done - 10% Application images. Image of a ship appears in grid cells where a ship has been sunk. 
+[x] - done - 10% Application images. Image of a ship appears in grid cells where a ship has been sunk. 
