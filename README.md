@@ -40,12 +40,13 @@ For this deliverable I built out the structure of my application using HTML.
 
 ## CSS Deliverable 
 
-[x] - done - Prerequisite: Simon CSS deployed to your production environment  
-[x] - done - Prerequisite: A link to your GitHub startup repository prominently displayed on your application's home page
-[x] - done - Prerequisite: Notes in your startup Git repository README.md file
-[x] - done - 30% Header, footer, and main content body. Used flex to layout sections.
-[x] - done - 20% Navigation elements. Links highlight on hover.
-[x] - done - 10% Responsive to window resizing. Looks great on iPad, desktop, and iPhone.
-[] - done - 20% Application elements.
-[] - done - 10% Application text content.
-[] - done - 10% Application images.
+[x] - done - Prerequisite: Simon CSS deployed to your production environment.  
+[x] - done - Prerequisite: A link to your GitHub startup repository prominently displayed on your application's home page.  
+[x] - done - Prerequisite: Notes in your startup Git repository README.md file.
+[x] - done - Prerequisite: At least 10 git commits spread consistently throughout the assignment period.    
+[x] - done - 30% Header, footer, and main content body. Used flex to layout sections.  
+[x] - done - 20% Navigation elements. Links highlight on hover.  
+[x] - done - 10% Responsive to window resizing. Looks great on iPad, desktop, and iPhone.  
+[x] - done - 20% Application elements. Navigation and buttons are using bootstrap.  
+[x] - done - 10% Application text content. Text is displaying in Helvetica font.  
+[] - done - 10% Application images.  
