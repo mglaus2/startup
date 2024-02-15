@@ -60,13 +60,23 @@ main {
     margin-bottom: 0.5vh; 
 }
 
-@media (max-width: 1000px){
+@media (max-width: 1025px) and (min-height: 600px) {
     .grid-and-colors {
         display: flex;
         flex-direction: row;
         align-items: flex-start;
         justify-content: space-between;
         width: 85vw;
+    }
+}
+
+@media (max-width: 1025px) and (max-height: 600px) {
+    .grid-and-colors {
+        display: flex;
+        flex-direction: row;
+        align-items: flex-start;
+        justify-content: space-between;
+        width: 70vw;
     }
 }
 
