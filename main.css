@@ -5,6 +5,7 @@ body {
     margin: 0;
     padding: 0;
     background-color: #1e3d59 !important; /* Body Color */
+    font-family: 'Helvetica', 'Arial', sans-serif;
 }
 
 header {
@@ -29,6 +30,10 @@ menu {
     display: flex;
     flex-direction: row !important;
     list-style: none;
+}
+
+.navbar {
+    white-space: nowrap;
 }
 
 menu .nav-item {
@@ -92,12 +97,26 @@ button {
     }
 }
 
-@media (max-width: 475px) {
+@media (max-width: 500px) {
     menu .nav-item {
-        font-size: 0.8rem;
+        font-size: 0.8em;
     }
 
     header .navbar-brand {
-        font-size: 0.8rem;
+        font-size: 0.8em;
+    }
+
+    footer {
+        font-size: 0.8em;
+    }
+}
+
+@media (max-width: 400px) {
+    menu .nav-item {
+        font-size: 0.7em;
+    }
+
+    header .navbar-brand {
+        font-size: 0.7em;
     }
 }

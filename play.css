@@ -5,14 +5,18 @@ main {
     justify-content: flex-start;
 }
 
-main h1 {
-    margin-bottom: 3vh;
+.grid-and-colors {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: space-between;
+    width: 50vw;
 }
 
 .grid {
+    flex: 1;
     display: grid;
     grid-template-columns: repeat(10, 1fr);
-    width: 25vw;
 }
 
 .grid div {
@@ -37,11 +41,13 @@ main h1 {
 }
 
 .pick-colors {
+    flex: 0 12em;
+    margin-left: 1vw;
+
     display: flex;
     flex-direction: column;
-    align-items: flex-end;
+    align-items: flex-start;
     justify-content: space-between;
-    width: 12vw;
 }
 
 .pick-colors div {
@@ -50,4 +56,30 @@ main h1 {
     align-items: center;
     width: 100%; 
     margin-bottom: 0.5vh; 
+}
+
+@media (max-width: 1000px){
+    .grid-and-colors {
+        display: flex;
+        flex-direction: row;
+        align-items: flex-start;
+        justify-content: space-between;
+        width: 85vw;
+    }
+}
+
+@media (max-width: 500px){
+    .grid-and-colors {
+        display: block;
+        width: 80vw;
+    }
+
+    .pick-colors {
+        margin-top: 1vh;
+        margin-bottom: 1vh;
+    }
+
+    button {
+        align-self: center;
+    }
 }
