@@ -40,7 +40,7 @@ For this deliverable I built out the structure of my application using HTML.
 
 ## CSS Deliverable 
 
-[x] - done - Prerequisite: Simon CSS deployed to your production environment
+[x] - done - Prerequisite: Simon CSS deployed to your production environment  
 [x] - done - Prerequisite: A link to your GitHub startup repository prominently displayed on your application's home page
 [x] - done - Prerequisite: Notes in your startup Git repository README.md file
 [x] - done - 30% Header, footer, and main content body. Used flex to layout sections.
