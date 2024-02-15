@@ -5,6 +5,10 @@ main {
     justify-content: flex-start;
 }
 
+main h1 {
+    margin-bottom: 3vh;
+}
+
 .grid {
     display: grid;
     grid-template-columns: repeat(10, 1fr);
@@ -14,14 +18,6 @@ main {
 .grid div {
     aspect-ratio: 1;
     border: 1px solid black;
-}
-
-main h1 {
-    margin-bottom: 3vh;
-}
-
-.table {
-    width: 80%;
 }
 
 .ship-cell {
@@ -38,4 +34,20 @@ main h1 {
 
 .miss-cell {
     background-color: #593b1e;
+}
+
+.pick-colors {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    justify-content: space-between;
+    width: 12vw;
+}
+
+.pick-colors div {
+    display: flex;
+    justify-content: space-between; 
+    align-items: center;
+    width: 100%; 
+    margin-bottom: 0.5vh; 
 }
