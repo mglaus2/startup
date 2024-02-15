@@ -1,12 +1,41 @@
-#board {
-    display: grid;
-    grid-template-columns: repeat(10, 40px);
-    grid-template-rows: repeat(10, 40px);
-    gap: 5px;
+main {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
 }
 
-td {
-    background-color: #000080;
-    color: #FF0000;
-    padding: 10px;
+.grid {
+    display: grid;
+    grid-template-columns: repeat(10, 1fr);
+    width: 25vw;
+}
+
+.grid div {
+    aspect-ratio: 1;
+    border: 1px solid black;
+}
+
+main h1 {
+    margin-bottom: 3vh;
+}
+
+.table {
+    width: 80%;
+}
+
+.ship-cell {
+    background-color: #ffc13b;
+}
+
+.open-cell {
+    background-color: #1e3d59;
+}
+
+.hit-cell {
+    background-color: #ff6e40;
+}
+
+.miss-cell {
+    background-color: #593b1e;
 }

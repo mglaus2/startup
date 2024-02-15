@@ -74,6 +74,12 @@ footer a:hover {
     padding-left: 1em;
 }
 
+button {
+    background-color: #1e3d59 !important;
+    border-color: #1e3d59 !important;
+    color: #e5e5dc !important;
+}
+
 @media (max-height: 600px) {
     header {
         display: none;
