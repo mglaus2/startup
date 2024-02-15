@@ -25,6 +25,8 @@ main {
 }
 
 .ship-cell {
+    background-image: url('ship.png');
+    background-size: cover; 
     background-color: #ffc13b;
 }
 
