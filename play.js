@@ -12,11 +12,11 @@ let opponentBoard = [
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     [4, 0, 0, 0, 0, 0, 4, 0, 0, 0],
     [4, 0, 0, 0, 0, 0, 4, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 4, 0, 0, 0],
     [0, 0, 0, 4, 0, 0, 0, 0, 0, 0],
     [0, 0, 0, 4, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 4, 4, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 4, 4, 4, 0, 0, 0, 0, 0],
+    [0, 0, 0, 4, 0, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
 ];
 
@@ -101,15 +101,17 @@ function handlePlayerCellClickGuess(event) {
         alert("Invalid Guess.");
     } else if(opponentBoard[row][col] === 4) {
         opponentBoard[row][col] = 2;
-        tempMatrix = createEmptyBoard();
+        let tempMatrix = createEmptyBoard();
+        console.log("CHECKING IF SUNK");
         if(checkIfSunk(row, col, tempMatrix, true)) {
-            opponentBoard[row][col] = 3;
+            displayBoard(opponentBoard, 'board', handlePlayerCellClickGuess);
+        } else {
+            updateCellAppearance(event.target, opponentBoard[row][col]);
         }
     } else {
         opponentBoard[row][col] = 1;
+        updateCellAppearance(event.target, opponentBoard[row][col]);
     }
-    
-    updateCellAppearance(event.target, opponentBoard[row][col]);
 }
 
 function updateCellAppearance(cellElement, cellValue) {
@@ -151,13 +153,23 @@ function validateShips() {
 
 function checkIfSunk(row, col, tempMatrix, firstIteration) {
     console.log(`Checking cell (${row}, ${col})`);
-    if (row < 0 || row >= numRowsAndCols || col < 0 || col >= numRowsAndCols || tempMatrix[row][col] === 3) {
+    if (row < 0 || row >= numRowsAndCols || col < 0 || col >= numRowsAndCols || tempMatrix[row][col] === 3 || tempMatrix[row][col] === 1) {
         return true;
     }
 
     if(!firstIteration) {
-        if (opponentBoard[row][col] !== 4  && !firstIteration) {
-            tempMatrix[row][col] = 3;
+        if (opponentBoard[row][col] !== 4) {
+            if(opponentBoard[row][col] === 2) {
+                tempMatrix[row][col] = 3;
+                const isSunk =
+                    checkIfSunk(row - 1, col, tempMatrix, false) &&
+                    checkIfSunk(row + 1, col, tempMatrix, false) &&
+                    checkIfSunk(row, col - 1, tempMatrix, false) &&
+                    checkIfSunk(row, col + 1, tempMatrix, false);
+                return isSunk;
+            } else {
+                tempMatrix[row][col] = 1;
+            }
             return true;
         } else {
             return false;
@@ -172,5 +184,15 @@ function checkIfSunk(row, col, tempMatrix, firstIteration) {
         checkIfSunk(row, col - 1, tempMatrix, false) &&
         checkIfSunk(row, col + 1, tempMatrix, false);
 
+    if(isSunk) {
+        console.log(tempMatrix);
+        for (let row = 0; row < numRowsAndCols; row++) {
+            for (let col = 0; col < numRowsAndCols; col++) {
+                if (tempMatrix[row][col] === 3) {
+                    opponentBoard[row][col] = 3;
+                }
+            }
+        }
+    }
     return isSunk;
 }
