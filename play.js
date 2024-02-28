@@ -67,11 +67,7 @@ function handlePlayerCellClickPlacingShips(event) {
         updatePlayerBoardCell(event.target);
 
         if (numShipsToPlace === 0) {
-            if (validateShips()) {
-                finalizeBoardButton.disabled = false;
-            } else {
-                alert("Invalid ships");
-            }
+            finalizeBoardButton.disabled = false;
         } else {
             finalizeBoardButton.disabled = true;
         }
@@ -104,9 +100,11 @@ function handlePlayerCellClickGuess(event) {
         console.log("CHECKING IF SUNK");
         if(checkIfSunk(row, col, tempMatrix, true)) {
             displayBoard(opponentBoard, 'board', handlePlayerCellClickGuess);
-            if(numHitsLeft === 0) {
-                alert("YOU WON!");
-            }
+            setTimeout(() => {
+                if (numHitsLeft === 0) {
+                    alert("YOU WON!");
+                }
+            }, 100);
         } else {
             updateCellAppearance(event.target, opponentBoard[row][col]);
         }
@@ -154,9 +152,13 @@ function validateShips() {
 }
 
 finalizeBoardButton.addEventListener('click', () => {
-    alert("Board Finalized!");
-    displayBoard(opponentBoard, 'board', handlePlayerCellClickGuess);
-    finalizeBoardButton.parentNode.removeChild(finalizeBoardButton);
+    if (validateShips()) {
+        alert("Board Finalized!");
+        displayBoard(opponentBoard, 'board', handlePlayerCellClickGuess);
+        finalizeBoardButton.parentNode.removeChild(finalizeBoardButton);
+    } else {
+        alert("Invalid ships");
+    }
 });
 
 function checkIfSunk(row, col, tempMatrix, firstIteration) {
