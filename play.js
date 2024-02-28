@@ -11,14 +11,15 @@ let playerBoard = createEmptyBoard();
 let opponentBoard = createEmptyBoard();
 let numShipsToPlace = 10;
 
-displayBoard(playerBoard, 'playerBoard', handlePlayerCellClick);
+displayBoard(opponentBoard, 'board', handlePlayerCellClickPlacingShips);
 
 function createEmptyBoard() {
-    return Array.from({ length: numRowsAndCols }, () => Array(numRowsAndCols).fill(0));
+    return Array.from(Array(numRowsAndCols), () => new Array(numRowsAndCols).fill(0));
 }
 
 function displayBoard(board, boardId, cellClickHandler) {
     const gameGrid = document.getElementById(boardId);
+    gameGrid.innerHTML = '';
 
     for (let row = 0; row < numRowsAndCols; row++) {
         for (let col = 0; col < numRowsAndCols; col++) {
@@ -27,7 +28,7 @@ function displayBoard(board, boardId, cellClickHandler) {
             cell.dataset.position = row * numRowsAndCols + col;
 
             // Add click event listener for the player's board during ship placement
-            if (cellClickHandler && numShipsToPlace > 0) {
+            if (cellClickHandler) {
                 cell.addEventListener('click', cellClickHandler);
             }
 
@@ -39,27 +40,36 @@ function displayBoard(board, boardId, cellClickHandler) {
     }
 }
 
-function handlePlayerCellClick(event) {
+function handlePlayerCellClickPlacingShips(event) {
     const position = parseInt(event.target.dataset.position);
     const row = Math.floor(position / numRowsAndCols);
     const col = position % numRowsAndCols;
-    if (numShipsToPlace > 0) {
-        // Place a ship on the player's board
-        playerBoard[row][col] = 1; // 1 represents a ship
+    
+    if(numShipsToPlace > 0 || playerBoard[row][col] === 3) {
+        if(playerBoard[row][col] === 0) {
+            playerBoard[row][col] = 3;
+        } else {
+            playerBoard[row][col] = 0;
+        }
 
-        // Update the visual appearance of the clicked cell
-        updateOpponentsBoardCell(event.target, playerBoard[row][col]);
+        updatePlayerBoardCell(event.target);
+
+        if (numShipsToPlace === 0) {
+            setTimeout(() => {
+                if (validateShips()) {
+                    alert("Switching to guessing mode!");
+                    displayBoard(opponentBoard, 'board', handlePlayerCellClickGuess);
+                } else {
+                    alert("Invalid ships");
+                }
+            }, 0);
+        }
     } else {
-        // Simulate a guess and update the opponent's board
-        const result = opponentBoard[row][col] === 1 ? 2 : 1; // 2 represents a hit, 1 represents a miss
-        opponentBoard[row][col] = result;
-
-        // Update the visual appearance of the clicked cell
-        updateCellAppearance(event.target, result);
+        alert("Too many ships.");
     }
 }
 
-function updateOpponentsBoardCell(cellElement) {
+function updatePlayerBoardCell(cellElement) {
     if(cellElement.className === "open-cell") {
         cellElement.className = "ship-cell";
         --numShipsToPlace;
@@ -67,6 +77,16 @@ function updateOpponentsBoardCell(cellElement) {
         cellElement.className = "open-cell";
         ++numShipsToPlace;
     }
+}
+
+function handlePlayerCellClickGuess(event) {
+    const position = parseInt(event.target.dataset.position);
+    const row = Math.floor(position / numRowsAndCols);
+    const col = position % numRowsAndCols;
+    
+    const result = opponentBoard[row][col] === 1 ? 2 : 1;
+    opponentBoard[row][col] = result;
+    updateCellAppearance(event.target, result);
 }
 
 function updateCellAppearance(cellElement, cellValue) {
@@ -79,4 +99,29 @@ function updateCellAppearance(cellElement, cellValue) {
     } else {
         cellElement.className = 'ship-cell';
     }
+}
+
+function validateShips() {
+    for (let row = 0; row < numRowsAndCols; row++) {
+        for (let col = 0; col < numRowsAndCols; col++) {
+            if (playerBoard[row][col] === 3) {
+                if (row - 1 >= 0 && playerBoard[row - 1][col] === 3) {
+                    continue;
+                }
+                if (row + 1 < numRowsAndCols && playerBoard[row + 1][col] === 3) {
+                    continue;
+                }
+                if (col - 1 >= 0 && playerBoard[row][col - 1] === 3) {
+                    continue;
+                }
+                if (col + 1 < numRowsAndCols && playerBoard[row][col + 1] === 3) {
+                    continue;
+                }
+
+                return false;
+            }
+        }
+    }
+
+    return true;
 }
