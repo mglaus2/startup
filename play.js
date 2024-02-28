@@ -25,12 +25,12 @@ const numRowsAndCols = 10;
 let playerBoard = createEmptyBoard();
 let numShipsToPlace = 10;
 let numHitsLeft = 10;
+let numLivesLeft = 10;
+let canGuess = true;
 
 displayBoard(playerBoard, 'board', handlePlayerCellClickPlacingShips);
 const finalizeBoardButton = document.getElementById('finalize-board-button');
 finalizeBoardButton.disabled = true;
-
-//simulateOpponentGuess();
 
 function createEmptyBoard() {
     return Array.from(Array(numRowsAndCols), () => new Array(numRowsAndCols).fill(0));
@@ -95,31 +95,40 @@ function handlePlayerCellClickGuess(event) {
     const row = Math.floor(position / numRowsAndCols);
     const col = position % numRowsAndCols;
     
-    if(opponentBoard[row][col] === 1 || opponentBoard[row][col] === 2 || opponentBoard[row][col] === 3) {
-        alert("Invalid Guess.");
-    } else if(opponentBoard[row][col] === 4) {
-        opponentBoard[row][col] = 2;
-        --numHitsLeft;
-        let tempMatrix = createEmptyBoard();
-        console.log("CHECKING IF SUNK");
-        if(checkIfSunk(row, col, tempMatrix, true, opponentBoard)) {
-            displayBoard(opponentBoard, 'board', handlePlayerCellClickGuess);
-            setTimeout(() => {
-                if (numHitsLeft === 0) {
-                    alert("YOU WON!");
-                }
-            }, 100);
-        } else {
-            updateCellAppearance(event.target, opponentBoard[row][col]);
-        }
-    } else {
-        opponentBoard[row][col] = 1;
-        updateCellAppearance(event.target, opponentBoard[row][col]);
-    }
+    if(canGuess) {
+        if(opponentBoard[row][col] === 1 || opponentBoard[row][col] === 2 || opponentBoard[row][col] === 3) {
+            alert("Invalid Guess.");
+        } else if(opponentBoard[row][col] === 4) {
+            canGuess = false;
+            opponentBoard[row][col] = 2;
+            --numHitsLeft;
+            let tempMatrix = createEmptyBoard();
+            console.log("CHECKING IF SUNK");
+            if(checkIfSunk(row, col, tempMatrix, true, opponentBoard)) {
+                displayBoard(opponentBoard, 'board', handlePlayerCellClickGuess);
+                setTimeout(() => {
+                    if (numHitsLeft === 0) {
+                        alert("YOU WON!");
+                    }
+                }, 1000);
+            } else {
+                updateCellAppearance(event.target, opponentBoard[row][col]);
+            }
 
-    setTimeout(() => {
-        simulateOpponentGuess();
-    }, 1000);
+            setTimeout(() => {
+                simulateOpponentGuess();
+            }, 1000);
+        } else {
+            canGuess = false;
+            opponentBoard[row][col] = 1;
+            updateCellAppearance(event.target, opponentBoard[row][col]);
+
+            setTimeout(() => {
+                simulateOpponentGuess();
+            }, 1000);
+        }
+
+    }
 }
 
 function updateCellAppearance(cellElement, cellValue) {
@@ -162,6 +171,7 @@ function validateShips() {
 finalizeBoardButton.addEventListener('click', () => {
     if (validateShips()) {
         alert("Board Finalized!");
+        playerNameEl.textContent = 'Opponent\'s Board';
         displayBoard(opponentBoard, 'board', handlePlayerCellClickGuess);
         finalizeBoardButton.parentNode.removeChild(finalizeBoardButton);
     } else {
@@ -217,6 +227,7 @@ function checkIfSunk(row, col, tempMatrix, firstIteration, board) {
 
 function simulateOpponentGuess() {
     console.log("SIMULATING OPPONENT");
+    playerNameEl.textContent = this.getPlayerName() + '\'s Board';
     displayBoard(playerBoard, 'board');
     const row = Math.floor(Math.random() * numRowsAndCols);
     const col = Math.floor(Math.random() * numRowsAndCols);
@@ -229,9 +240,15 @@ function simulateOpponentGuess() {
         updateCellAppearance(cellElement, 1);
     } else if(playerBoard[row][col] === 4) {
         playerBoard[row][col] = 2;
+        --numLivesLeft;
         let tempMatrix = createEmptyBoard();
         if(checkIfSunk(row, col, tempMatrix, true, playerBoard)) {
             displayBoard(playerBoard, 'board');
+            setTimeout(() => {
+                if (numHitsLeft === 0) {
+                    alert("You lost.");
+                }
+            }, 1000);
         } else {
             const cellId = row * numRowsAndCols + col;
             const cellElement = document.querySelector(`#board [data-position="${cellId}"]`);
@@ -244,8 +261,10 @@ function simulateOpponentGuess() {
     }
 
     setTimeout(() => {
+        playerNameEl.textContent = 'Opponent\'s Board';
         displayBoard(opponentBoard, 'board', handlePlayerCellClickGuess);
     }, 5000);
+    canGuess = true;
 }
 
 
