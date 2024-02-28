@@ -6,7 +6,7 @@ function getPlayerName() {
 }
 
 // 0 is open cell, 1 is miss, 2 is hit, 3 is sunk ship, and 4 is ship is there but not interacted with
-// WOULD GET OPPONENTS BOARD THROUGH WEB SOCKETS BUT NOW CREATED WITH DUMMY DATA
+// WOULD GET OPPONENTS BOARD THROUGH WEB SOCKETS AND DATABASE BUT NOW CREATED WITH DUMMY DATA
 let opponentBoard = [
     [0, 4, 4, 0, 0, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -31,6 +31,16 @@ let canGuess = true;
 displayBoard(playerBoard, 'board', handlePlayerCellClickPlacingShips);
 const finalizeBoardButton = document.getElementById('finalize-board-button');
 finalizeBoardButton.disabled = true;
+
+const openColorInput = document.getElementById('openColor');
+const shipColorInput = document.getElementById('shipColor');
+const hitColorInput = document.getElementById('hitColor');
+const missColorInput = document.getElementById('missColor');
+
+openColorInput.addEventListener('input', handleColorChange);
+shipColorInput.addEventListener('input', handleColorChange);
+hitColorInput.addEventListener('input', handleColorChange);
+missColorInput.addEventListener('input', handleColorChange);
 
 function createEmptyBoard() {
     return Array.from(Array(numRowsAndCols), () => new Array(numRowsAndCols).fill(0));
@@ -267,4 +277,17 @@ function simulateOpponentGuess() {
     canGuess = true;
 }
 
+function handleColorChange() {
+    const openColor = openColorInput.value;
+    const shipColor = shipColorInput.value;
+    const hitColor = hitColorInput.value;
+    const missColor = missColorInput.value;
 
+    document.documentElement.style.setProperty('--open-cell-color', openColor);
+    document.documentElement.style.setProperty('--ship-cell-color', shipColor);
+    document.documentElement.style.setProperty('--hit-cell-color', hitColor);
+    document.documentElement.style.setProperty('--miss-cell-color', missColor);
+}
+
+// everything that is supposed to be stored in the database should be stored in 
+// local storage. I think I need to store the boards in local storage then w/ gameID
