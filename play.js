@@ -1,35 +1,25 @@
 const playerNameEl = document.getElementById('username'); 
 playerNameEl.textContent = this.getPlayerName() + '\'s Board';
 
+const opponentName = localStorage.getItem('opponentName') ?? 'Mystery Player';
+const gameID = localStorage.getItem('gameID') ?? 'No Game ID';
+
 function getPlayerName() {
     return localStorage.getItem('username') ?? 'Mystery Player';
 }
 
-// 0 is open cell, 1 is miss, 2 is hit, 3 is sunk ship, and 4 is ship is there but not interacted with
-// WOULD GET OPPONENTS BOARD THROUGH WEB SOCKETS AND DATABASE BUT NOW CREATED WITH DUMMY DATA
-let opponentBoard = [
-    [0, 4, 4, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 4, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 4, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 4, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 4, 0, 0, 0, 0, 0, 0],
-    [0, 0, 4, 4, 4, 0, 0, 0, 0, 0],
-    [0, 0, 0, 4, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-];
-
 const numRowsAndCols = 10;
 
-let playerBoard = createEmptyBoard();
 let numShipsToPlace = 10;
 let numHitsLeft = 10;
 let numLivesLeft = 10;
-let canGuess = true;
-
-displayBoard(playerBoard, 'board', handlePlayerCellClickPlacingShips);
+let canGuess;
+let playerBoard;
+let opponentBoard;
 const finalizeBoardButton = document.getElementById('finalize-board-button');
+
+retrieveBoards();
+
 finalizeBoardButton.disabled = true;
 
 const openColorInput = document.getElementById('openColor');
@@ -44,6 +34,58 @@ missColorInput.addEventListener('input', handleColorChange);
 
 function createEmptyBoard() {
     return Array.from(Array(numRowsAndCols), () => new Array(numRowsAndCols).fill(0));
+}
+
+// instead of storing information in database based off of gameID, it just stores the current game in local storage
+function storeBoards() {
+    const playerBoardString = JSON.stringify(playerBoard);
+    const opponentBoardString = JSON.stringify(opponentBoard);
+
+    localStorage.setItem(`playerBoard_${gameID}`, playerBoardString);
+    localStorage.setItem(`opponentBoard_${gameID}`, opponentBoardString);
+    localStorage.setItem('canGuess', canGuess);
+}
+
+// would pull from database instead of local storage
+function retrieveBoards() {
+    const playerBoardString = localStorage.getItem(`playerBoard_${gameID}`);
+    const opponentBoardString = localStorage.getItem(`opponentBoard_${gameID}`);
+    canGuess = localStorage.getItem('canGuess');
+
+    if (playerBoardString && opponentBoardString) {
+        console.log("GETTING BOARDS");
+        playerBoard = JSON.parse(playerBoardString);
+        opponentBoard = JSON.parse(opponentBoardString);
+        finalizeBoardButton.parentNode.removeChild(finalizeBoardButton);
+
+        if(canGuess) {
+            playerNameEl.textContent = opponentName + '\'s Board';
+            displayBoard(opponentBoard, 'board', handlePlayerCellClickGuess);
+        } else {
+            setTimeout(() => {
+                simulateOpponentGuess();
+            }, 1000);
+            storeBoards();
+        }
+    } else {
+        // 0 is open cell, 1 is miss, 2 is hit, 3 is sunk ship, and 4 is ship is there but not interacted with
+        // WOULD GET OPPONENTS BOARD THROUGH WEB SOCKETS AND DATABASE BUT NOW CREATED WITH DUMMY DATA
+        playerBoard = createEmptyBoard();
+        opponentBoard = [
+            [0, 4, 4, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 4, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 4, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 4, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 4, 0, 0, 0, 0, 0, 0],
+            [0, 0, 4, 4, 4, 0, 0, 0, 0, 0],
+            [0, 0, 0, 4, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        ];
+        canGuess = true;
+        displayBoard(playerBoard, 'board', handlePlayerCellClickPlacingShips);
+    }
 }
 
 function displayBoard(board, boardId, cellClickHandler) {
@@ -125,6 +167,8 @@ function handlePlayerCellClickGuess(event) {
                 updateCellAppearance(event.target, opponentBoard[row][col]);
             }
 
+            storeBoards();
+
             setTimeout(() => {
                 simulateOpponentGuess();
             }, 1000);
@@ -132,6 +176,8 @@ function handlePlayerCellClickGuess(event) {
             canGuess = false;
             opponentBoard[row][col] = 1;
             updateCellAppearance(event.target, opponentBoard[row][col]);
+
+            storeBoards();
 
             setTimeout(() => {
                 simulateOpponentGuess();
@@ -181,9 +227,10 @@ function validateShips() {
 finalizeBoardButton.addEventListener('click', () => {
     if (validateShips()) {
         alert("Board Finalized!");
-        playerNameEl.textContent = 'Opponent\'s Board';
+        playerNameEl.textContent = opponentName + '\'s Board';
         displayBoard(opponentBoard, 'board', handlePlayerCellClickGuess);
         finalizeBoardButton.parentNode.removeChild(finalizeBoardButton);
+        storeBoards();
     } else {
         alert("Invalid ships");
     }
@@ -270,11 +317,13 @@ function simulateOpponentGuess() {
         simulateOpponentGuess();
     }
 
+    storeBoards();
+
     setTimeout(() => {
-        playerNameEl.textContent = 'Opponent\'s Board';
+        playerNameEl.textContent = opponentName + '\'s Board';
         displayBoard(opponentBoard, 'board', handlePlayerCellClickGuess);
+        canGuess = true;
     }, 5000);
-    canGuess = true;
 }
 
 function handleColorChange() {
@@ -288,6 +337,3 @@ function handleColorChange() {
     document.documentElement.style.setProperty('--hit-cell-color', hitColor);
     document.documentElement.style.setProperty('--miss-cell-color', missColor);
 }
-
-// everything that is supposed to be stored in the database should be stored in 
-// local storage. I think I need to store the boards in local storage then w/ gameID

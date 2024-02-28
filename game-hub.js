@@ -9,7 +9,7 @@ function handleFormSubmission() {
     localStorage.setItem("gameID", gameIDEl.value);
 
     // This is where the websocket would get the opponents name and put info into database
-    const opponentName = "Opponent";
+    const opponentName = "Computer";
     localStorage.setItem("opponentName", opponentName);
     alert(`Connected with ${opponentName} with GameID: ${gameIDEl.value}`);
 
