@@ -11,6 +11,9 @@
       integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi"
       crossorigin="anonymous"
     />
+
+    <script src="game-hub.js"></script>
+
     <title>Battleship Online</title>
   </head>
   <body>
@@ -28,12 +31,12 @@
 
     <main class="container-fluid">
       <h1>Create or Join Game</h1>
-      <form method="get" action="play.html">
+      <form>
         <div class="form-input">
           <label for="gameID">GameID:</label>
           <input type="text" id="gameID" placeholder="Your GameID Here" required />
         </div>
-        <button type="submit" class="btn btn-primary">Create or Join Game</button>
+        <button type="button" class="btn btn-primary" onclick="handleFormSubmission()">Create or Join Game</button>
       </form>
     </main>
 
