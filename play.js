@@ -30,6 +30,8 @@ displayBoard(playerBoard, 'board', handlePlayerCellClickPlacingShips);
 const finalizeBoardButton = document.getElementById('finalize-board-button');
 finalizeBoardButton.disabled = true;
 
+//simulateOpponentGuess();
+
 function createEmptyBoard() {
     return Array.from(Array(numRowsAndCols), () => new Array(numRowsAndCols).fill(0));
 }
@@ -43,7 +45,9 @@ function displayBoard(board, boardId, cellClickHandler) {
             const cell = document.createElement('div');
             cell.dataset.position = row * numRowsAndCols + col;
 
-            cell.addEventListener('click', cellClickHandler);
+            if(cellClickHandler) {
+                cell.addEventListener('click', cellClickHandler);
+            }
 
             updateCellAppearance(cell, board[row][col]);
 
@@ -98,7 +102,7 @@ function handlePlayerCellClickGuess(event) {
         --numHitsLeft;
         let tempMatrix = createEmptyBoard();
         console.log("CHECKING IF SUNK");
-        if(checkIfSunk(row, col, tempMatrix, true)) {
+        if(checkIfSunk(row, col, tempMatrix, true, opponentBoard)) {
             displayBoard(opponentBoard, 'board', handlePlayerCellClickGuess);
             setTimeout(() => {
                 if (numHitsLeft === 0) {
@@ -112,6 +116,10 @@ function handlePlayerCellClickGuess(event) {
         opponentBoard[row][col] = 1;
         updateCellAppearance(event.target, opponentBoard[row][col]);
     }
+
+    setTimeout(() => {
+        simulateOpponentGuess();
+    }, 1000);
 }
 
 function updateCellAppearance(cellElement, cellValue) {
@@ -161,21 +169,21 @@ finalizeBoardButton.addEventListener('click', () => {
     }
 });
 
-function checkIfSunk(row, col, tempMatrix, firstIteration) {
+function checkIfSunk(row, col, tempMatrix, firstIteration, board) {
     console.log(`Checking cell (${row}, ${col})`);
     if (row < 0 || row >= numRowsAndCols || col < 0 || col >= numRowsAndCols || tempMatrix[row][col] === 3 || tempMatrix[row][col] === 1) {
         return true;
     }
 
     if(!firstIteration) {
-        if (opponentBoard[row][col] !== 4) {
-            if(opponentBoard[row][col] === 2) {
+        if (board[row][col] !== 4) {
+            if(board[row][col] === 2) {
                 tempMatrix[row][col] = 3;
                 const isSunk =
-                    checkIfSunk(row - 1, col, tempMatrix, false) &&
-                    checkIfSunk(row + 1, col, tempMatrix, false) &&
-                    checkIfSunk(row, col - 1, tempMatrix, false) &&
-                    checkIfSunk(row, col + 1, tempMatrix, false);
+                    checkIfSunk(row - 1, col, tempMatrix, false, board) &&
+                    checkIfSunk(row + 1, col, tempMatrix, false, board) &&
+                    checkIfSunk(row, col - 1, tempMatrix, false, board) &&
+                    checkIfSunk(row, col + 1, tempMatrix, false, board);
                 return isSunk;
             } else {
                 tempMatrix[row][col] = 1;
@@ -189,20 +197,55 @@ function checkIfSunk(row, col, tempMatrix, firstIteration) {
     }
     
     const isSunk =
-        checkIfSunk(row - 1, col, tempMatrix, false) &&
-        checkIfSunk(row + 1, col, tempMatrix, false) &&
-        checkIfSunk(row, col - 1, tempMatrix, false) &&
-        checkIfSunk(row, col + 1, tempMatrix, false);
+        checkIfSunk(row - 1, col, tempMatrix, false, board) &&
+        checkIfSunk(row + 1, col, tempMatrix, false, board) &&
+        checkIfSunk(row, col - 1, tempMatrix, false, board) &&
+        checkIfSunk(row, col + 1, tempMatrix, false, board);
 
     if(isSunk) {
         console.log(tempMatrix);
         for (let row = 0; row < numRowsAndCols; row++) {
             for (let col = 0; col < numRowsAndCols; col++) {
                 if (tempMatrix[row][col] === 3) {
-                    opponentBoard[row][col] = 3;
+                    board[row][col] = 3;
                 }
             }
         }
     }
     return isSunk;
 }
+
+function simulateOpponentGuess() {
+    console.log("SIMULATING OPPONENT");
+    displayBoard(playerBoard, 'board');
+    const row = Math.floor(Math.random() * numRowsAndCols);
+    const col = Math.floor(Math.random() * numRowsAndCols);
+
+    // Check if the cell has already been guessed by the opponent
+    if (playerBoard[row][col] === 0) {
+        playerBoard[row][col] = 1;
+        const cellId = row * numRowsAndCols + col;
+        const cellElement = document.querySelector(`#board [data-position="${cellId}"]`);
+        updateCellAppearance(cellElement, 1);
+    } else if(playerBoard[row][col] === 4) {
+        playerBoard[row][col] = 2;
+        let tempMatrix = createEmptyBoard();
+        if(checkIfSunk(row, col, tempMatrix, true, playerBoard)) {
+            displayBoard(playerBoard, 'board');
+        } else {
+            const cellId = row * numRowsAndCols + col;
+            const cellElement = document.querySelector(`#board [data-position="${cellId}"]`);
+            updateCellAppearance(cellElement, 2);
+        }
+    } 
+    else {
+        // Cell has already been guessed, try again
+        simulateOpponentGuess();
+    }
+
+    setTimeout(() => {
+        displayBoard(opponentBoard, 'board', handlePlayerCellClickGuess);
+    }, 5000);
+}
+
+
