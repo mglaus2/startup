@@ -60,6 +60,10 @@ main {
     margin-bottom: 0.5vh; 
 }
 
+.btn {
+    margin-bottom: 0.5vh;
+}
+
 @media (max-width: 1025px) and (min-height: 600px) {
     .grid-and-colors {
         display: flex;

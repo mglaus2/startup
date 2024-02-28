@@ -10,10 +10,10 @@ function getPlayerName() {
 let opponentBoard = [
     [0, 4, 4, 0, 0, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [4, 0, 0, 0, 0, 0, 4, 0, 0, 0],
-    [4, 0, 0, 0, 0, 0, 4, 0, 0, 0],
     [0, 0, 0, 0, 0, 0, 4, 0, 0, 0],
-    [0, 0, 0, 4, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 4, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 4, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     [0, 0, 0, 4, 0, 0, 0, 0, 0, 0],
     [0, 0, 4, 4, 4, 0, 0, 0, 0, 0],
     [0, 0, 0, 4, 0, 0, 0, 0, 0, 0],
@@ -24,8 +24,11 @@ const numRowsAndCols = 10;
 
 let playerBoard = createEmptyBoard();
 let numShipsToPlace = 10;
+let numHitsLeft = 10;
 
 displayBoard(playerBoard, 'board', handlePlayerCellClickPlacingShips);
+const finalizeBoardButton = document.getElementById('finalize-board-button');
+finalizeBoardButton.disabled = true;
 
 function createEmptyBoard() {
     return Array.from(Array(numRowsAndCols), () => new Array(numRowsAndCols).fill(0));
@@ -40,12 +43,8 @@ function displayBoard(board, boardId, cellClickHandler) {
             const cell = document.createElement('div');
             cell.dataset.position = row * numRowsAndCols + col;
 
-            // Add click event listener for the player's board during ship placement
-            if (cellClickHandler) {
-                cell.addEventListener('click', cellClickHandler);
-            }
+            cell.addEventListener('click', cellClickHandler);
 
-            // Update cell appearance based on the board value
             updateCellAppearance(cell, board[row][col]);
 
             gameGrid.appendChild(cell);
@@ -68,14 +67,13 @@ function handlePlayerCellClickPlacingShips(event) {
         updatePlayerBoardCell(event.target);
 
         if (numShipsToPlace === 0) {
-            setTimeout(() => {
-                if (validateShips()) {
-                    alert("Switching to guessing mode!");
-                    displayBoard(opponentBoard, 'board', handlePlayerCellClickGuess);
-                } else {
-                    alert("Invalid ships");
-                }
-            }, 0);
+            if (validateShips()) {
+                finalizeBoardButton.disabled = false;
+            } else {
+                alert("Invalid ships");
+            }
+        } else {
+            finalizeBoardButton.disabled = true;
         }
     } else {
         alert("Too many ships.");
@@ -101,10 +99,14 @@ function handlePlayerCellClickGuess(event) {
         alert("Invalid Guess.");
     } else if(opponentBoard[row][col] === 4) {
         opponentBoard[row][col] = 2;
+        --numHitsLeft;
         let tempMatrix = createEmptyBoard();
         console.log("CHECKING IF SUNK");
         if(checkIfSunk(row, col, tempMatrix, true)) {
             displayBoard(opponentBoard, 'board', handlePlayerCellClickGuess);
+            if(numHitsLeft === 0) {
+                alert("YOU WON!");
+            }
         } else {
             updateCellAppearance(event.target, opponentBoard[row][col]);
         }
@@ -150,6 +152,12 @@ function validateShips() {
 
     return true;
 }
+
+finalizeBoardButton.addEventListener('click', () => {
+    alert("Board Finalized!");
+    displayBoard(opponentBoard, 'board', handlePlayerCellClickGuess);
+    finalizeBoardButton.parentNode.removeChild(finalizeBoardButton);
+});
 
 function checkIfSunk(row, col, tempMatrix, firstIteration) {
     console.log(`Checking cell (${row}, ${col})`);
