@@ -1,15 +1,9 @@
-const playerNameEl = document.getElementById('username'); 
-playerNameEl.textContent = this.getPlayerName() + '\'s Board';
-
+const playerNameEl = document.getElementById('username');
+const username = localStorage.getItem('username') ?? 'Mystery Player';
 const opponentName = localStorage.getItem('opponentName') ?? 'Mystery Player';
 const gameID = localStorage.getItem('gameID') ?? 'No Game ID';
 
-function getPlayerName() {
-    return localStorage.getItem('username') ?? 'Mystery Player';
-}
-
 const numRowsAndCols = 10;
-
 let numShipsToPlace = 10;
 let numHitsLeft = 10;
 let numLivesLeft = 10;
@@ -43,19 +37,23 @@ function storeBoards() {
 
     localStorage.setItem(`playerBoard_${gameID}`, playerBoardString);
     localStorage.setItem(`opponentBoard_${gameID}`, opponentBoardString);
-    localStorage.setItem('canGuess', canGuess);
+    localStorage.setItem(`canGuess_${gameID}`, canGuess);
+    localStorage.setItem(`numLivesLeft_${gameID}`, numLivesLeft);
+    localStorage.setItem(`numHitsLeft_${gameID}`, numHitsLeft);
 }
 
 // would pull from database instead of local storage
 function retrieveBoards() {
     const playerBoardString = localStorage.getItem(`playerBoard_${gameID}`);
     const opponentBoardString = localStorage.getItem(`opponentBoard_${gameID}`);
-    canGuess = localStorage.getItem('canGuess');
 
     if (playerBoardString && opponentBoardString) {
         console.log("GETTING BOARDS");
         playerBoard = JSON.parse(playerBoardString);
         opponentBoard = JSON.parse(opponentBoardString);
+        canGuess = localStorage.getItem(`canGuess_${gameID}`);
+        numLivesLeft = localStorage.getItem(`numLivesLeft_${gameID}`);
+        numHitsLeft = localStorage.getItem(`numHitsLeft_${gameID}`);
         finalizeBoardButton.parentNode.removeChild(finalizeBoardButton);
 
         if(canGuess) {
@@ -84,6 +82,7 @@ function retrieveBoards() {
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
         ];
         canGuess = true;
+        playerNameEl.textContent = username + '\'s Board';
         displayBoard(playerBoard, 'board', handlePlayerCellClickPlacingShips);
     }
 }
@@ -161,6 +160,7 @@ function handlePlayerCellClickGuess(event) {
                 setTimeout(() => {
                     if (numHitsLeft === 0) {
                         alert("YOU WON!");
+                        storeResults(true);
                     }
                 }, 1000);
             } else {
@@ -284,7 +284,7 @@ function checkIfSunk(row, col, tempMatrix, firstIteration, board) {
 
 function simulateOpponentGuess() {
     console.log("SIMULATING OPPONENT");
-    playerNameEl.textContent = this.getPlayerName() + '\'s Board';
+    playerNameEl.textContent = username + '\'s Board';
     displayBoard(playerBoard, 'board');
     const row = Math.floor(Math.random() * numRowsAndCols);
     const col = Math.floor(Math.random() * numRowsAndCols);
@@ -304,6 +304,7 @@ function simulateOpponentGuess() {
             setTimeout(() => {
                 if (numHitsLeft === 0) {
                     alert("You lost.");
+                    storeResults(false);
                 }
             }, 1000);
         } else {
@@ -336,4 +337,32 @@ function handleColorChange() {
     document.documentElement.style.setProperty('--ship-cell-color', shipColor);
     document.documentElement.style.setProperty('--hit-cell-color', hitColor);
     document.documentElement.style.setProperty('--miss-cell-color', missColor);
+}
+
+function storeResults(didWin) {
+    let records = [];
+    const recordsText = localStorage.getItem('gameRecords');
+    if(recordsText) {
+        records = JSON.parse(recordsText);
+    }
+    
+    // check if there is an existing record based on username and opponentName
+    const existingRecord = records.find(record => record.username === username && record.opponent === opponentName);
+
+    if (existingRecord) {
+        if (didWin === true) {
+            existingRecord.wins++;
+        } else if (didWin === false) {
+            existingRecord.losses++;
+        }
+    } else {
+        records.push({
+            username: username,
+            opponent: opponentName,
+            wins: didWin === true ? 1 : 0,
+            losses: didWin === false ? 1 : 0
+        });
+    }
+
+    localStorage.setItem('gameRecords', JSON.stringify(records));
 }
