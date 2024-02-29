@@ -30,7 +30,7 @@ function createEmptyBoard() {
     return Array.from(Array(numRowsAndCols), () => new Array(numRowsAndCols).fill(0));
 }
 
-// instead of storing information in database based off of gameID, it just stores the current game in local storage
+// currently stores boards in local storage with gameID, will store in database based off of gameID
 function storeBoards() {
     const playerBoardString = JSON.stringify(playerBoard);
     const opponentBoardString = JSON.stringify(opponentBoard);
@@ -42,7 +42,7 @@ function storeBoards() {
     localStorage.setItem(`numHitsLeft_${gameID}`, numHitsLeft);
 }
 
-// would pull from database instead of local storage
+// will pull from database instead of local storage
 function retrieveBoards() {
     const playerBoardString = localStorage.getItem(`playerBoard_${gameID}`);
     const opponentBoardString = localStorage.getItem(`opponentBoard_${gameID}`);
@@ -80,7 +80,7 @@ function retrieveBoards() {
         }
     } else {
         // 0 is open cell, 1 is miss, 2 is hit, 3 is sunk ship, and 4 is ship is there but not interacted with
-        // WOULD GET OPPONENTS BOARD THROUGH WEB SOCKETS AND DATABASE BUT NOW CREATED WITH DUMMY DATA
+        // WOULD GET OPPONENTS BOARD THROUGH WEB SOCKETS BUT NOW CREATED WITH DUMMY DATA
         playerBoard = createEmptyBoard();
         opponentBoard = [
             [0, 4, 4, 0, 0, 0, 0, 0, 0, 0],
@@ -158,6 +158,7 @@ function updatePlayerBoardCell(cellElement) {
     }
 }
 
+// need to include updating opponent with Web Socket
 function handlePlayerCellClickGuess(event) {
     const position = parseInt(event.target.dataset.position);
     const row = Math.floor(position / numRowsAndCols);
@@ -315,6 +316,7 @@ function checkIfSunk(row, col, tempMatrix, firstIteration, board) {
     return isSunk;
 }
 
+// will get opponents guess through web socket instead of simulation
 function simulateOpponentGuess() {
     console.log("SIMULATING OPPONENT");
     playerNameEl.textContent = username + '\'s Board';
@@ -373,6 +375,7 @@ function handleColorChange() {
     document.documentElement.style.setProperty('--miss-cell-color', missColor);
 }
 
+// store in database rather than local storage
 function storeResults(didWin) {
     let records = [];
     const recordsText = localStorage.getItem('gameRecords');

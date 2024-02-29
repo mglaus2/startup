@@ -5,6 +5,7 @@ playerNameEl.textContent = username + '\'s Leaderboard';
 let totalWins = 0;
 let totalLosses = 0;
 
+// get records from database instead of local storage
 function loadScores() {
     let hasRecord = false;
     let records = [];
