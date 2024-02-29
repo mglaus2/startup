@@ -42,11 +42,22 @@ For this deliverable I built out the structure of my application using HTML.
 
 [x] - done - Prerequisite: Simon CSS deployed to your production environment.  
 [x] - done - Prerequisite: A link to your GitHub startup repository prominently displayed on your application's home page.  
-[x] - done - Prerequisite: Notes in your startup Git repository README.md file.
+[x] - done - Prerequisite: Notes in your startup Git repository README.md file.  
 [x] - done - Prerequisite: At least 10 git commits spread consistently throughout the assignment period.  
 [x] - done - 30% Header, footer, and main content body. Used flex to layout sections.  
 [x] - done - 20% Navigation elements. Links highlight on hover.  
 [x] - done - 10% Responsive to window resizing. Looks great on iPad, desktop, and iPhone.  
 [x] - done - 20% Application elements. Navigation and buttons are using bootstrap.  
 [x] - done - 10% Application text content. Text is displaying in Helvetica font.  
-[x] - done - 10% Application images. Image of a ship appears in grid cells where a ship has been sunk. 
+[x] - done - 10% Application images. Image of a ship appears in grid cells where a ship has been sunk.  
+
+## JavaScript Deliverable
+
+[x] - done - Prerequisite: Simon JavaScript deployed to your production environment.  
+[x] - done - Prerequisite: A link to your GitHub startup repository prominently displayed on your application's home page.  
+[x] - done - Prerequisite: Notes in your startup Git repository README.md file.  
+[x] - done - Prerequisite: At least 10 git commits spread consistently throughout the assignment period.  
+[x] - done - 20% JavaScript support for future login. Simulated login on home page. Stores username and password in local storage which will be replaced with database storage/authentication.  
+[x] - done - 20% JavaScript support for future database data. A lot of data is currently stored in local storage that will be stored in the database. This includes username, password, gameID, user and opponents boards, information about current game, and each users personal record. Currently each board and game information is stored with gameID which will be the same in the database.  
+[x] - done - 20% JavaScript support for future WebSocket. Currently I simulate the connection to an opponent and then used dummy data for the opponents board. I created an algorithm to simulate your opponent guessing. This will be replaced with Web Socket to connect with an opponent and updates based on you and your opponents moves.  
+[x] - done - 40% JavaScript support for your application's interaction logic. Currently everything works and interacts as expected. The login updates the username, the gameID changes the game being played, and the board is fully operational with placing 10 ships, guessing on the opponents board, and error checking of ship placement and guessing. Then the leaderboard is updated based on the results of the game.  
