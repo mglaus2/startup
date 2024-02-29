@@ -37,6 +37,18 @@ main {
     background-color: var(--ship-cell-color);
 }
 
+.hit-cell-with-ship {
+    background-image: url('ship.png');
+    background-size: cover; 
+    background-color: var(--hit-cell-color);
+}
+
+.hidden-ship-cell {
+    background-image: url('ship.png');
+    background-size: cover; 
+    background-color: var(--open-cell-color);
+}
+
 .open-cell {
     background-color: var(--open-cell-color);
 }

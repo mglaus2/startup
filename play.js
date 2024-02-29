@@ -52,18 +52,31 @@ function retrieveBoards() {
         playerBoard = JSON.parse(playerBoardString);
         opponentBoard = JSON.parse(opponentBoardString);
         canGuess = localStorage.getItem(`canGuess_${gameID}`);
-        numLivesLeft = localStorage.getItem(`numLivesLeft_${gameID}`);
-        numHitsLeft = localStorage.getItem(`numHitsLeft_${gameID}`);
+        numLivesLeft = parseInt(localStorage.getItem(`numLivesLeft_${gameID}`));
+        numHitsLeft = parseInt(localStorage.getItem(`numHitsLeft_${gameID}`));
         finalizeBoardButton.parentNode.removeChild(finalizeBoardButton);
 
         if(canGuess) {
+            console.log("CAN GUESS");
+            console.log(numLivesLeft);
+            console.log(numHitsLeft);
             playerNameEl.textContent = opponentName + '\'s Board';
-            displayBoard(opponentBoard, 'board', handlePlayerCellClickGuess);
+            if(numLivesLeft === 0 || numHitsLeft === 0) {
+                console.log("GAME OVER");
+                displayBoard(opponentBoard, 'board');
+            } else {
+                displayBoard(opponentBoard, 'board', handlePlayerCellClickGuess);
+            }
         } else {
-            setTimeout(() => {
-                simulateOpponentGuess();
-            }, 1000);
-            storeBoards();
+            if(numLivesLeft === 0 || numHitsLeft === 0) {
+                print("GAME OVER");
+                displayBoard(playerBoard, 'board');
+            } else {
+                setTimeout(() => {
+                    simulateOpponentGuess();
+                }, 1000);
+                storeBoards();
+            }
         }
     } else {
         // 0 is open cell, 1 is miss, 2 is hit, 3 is sunk ship, and 4 is ship is there but not interacted with
@@ -100,7 +113,11 @@ function displayBoard(board, boardId, cellClickHandler) {
                 cell.addEventListener('click', cellClickHandler);
             }
 
-            updateCellAppearance(cell, board[row][col]);
+            if(board === opponentBoard) {
+                updateCellAppearanceOpponent(cell, board[row][col]);
+            } else if(board === playerBoard) {
+                updateCellAppearancePlayer(cell, board[row][col]);
+            }
 
             gameGrid.appendChild(cell);
         }
@@ -161,21 +178,23 @@ function handlePlayerCellClickGuess(event) {
                     if (numHitsLeft === 0) {
                         alert("YOU WON!");
                         storeResults(true);
+                        storeBoards();
+                        displayBoard(opponentBoard, 'board');
+                    } else {
+                        simulateOpponentGuess();
                     }
                 }, 1000);
             } else {
-                updateCellAppearance(event.target, opponentBoard[row][col]);
+                updateCellAppearanceOpponent(event.target, opponentBoard[row][col]);
+                storeBoards();
+                setTimeout(() => {
+                    simulateOpponentGuess();
+                }, 1000);
             }
-
-            storeBoards();
-
-            setTimeout(() => {
-                simulateOpponentGuess();
-            }, 1000);
         } else {
             canGuess = false;
             opponentBoard[row][col] = 1;
-            updateCellAppearance(event.target, opponentBoard[row][col]);
+            updateCellAppearanceOpponent(event.target, opponentBoard[row][col]);
 
             storeBoards();
 
@@ -187,7 +206,7 @@ function handlePlayerCellClickGuess(event) {
     }
 }
 
-function updateCellAppearance(cellElement, cellValue) {
+function updateCellAppearanceOpponent(cellElement, cellValue) {
     if(cellValue === 0 || cellValue === 4) {
         cellElement.className = 'open-cell';
     } else if(cellValue === 1) {
@@ -196,6 +215,20 @@ function updateCellAppearance(cellElement, cellValue) {
         cellElement.className = 'hit-cell';
     } else if(cellValue === 3) {
         cellElement.className = 'ship-cell';
+    }
+}
+
+function updateCellAppearancePlayer(cellElement, cellValue) {
+    if(cellValue === 0) {
+        cellElement.className = 'open-cell';
+    } else if(cellValue === 1) {
+        cellElement.className = 'miss-cell';
+    } else if(cellValue === 2) {
+        cellElement.className = 'hit-cell-with-ship';
+    } else if(cellValue === 3) {
+        cellElement.className = 'ship-cell';
+    } else if(cellValue === 4) {
+        cellElement.className = 'hidden-ship-cell';
     }
 }
 
@@ -294,7 +327,7 @@ function simulateOpponentGuess() {
         playerBoard[row][col] = 1;
         const cellId = row * numRowsAndCols + col;
         const cellElement = document.querySelector(`#board [data-position="${cellId}"]`);
-        updateCellAppearance(cellElement, 1);
+        updateCellAppearancePlayer(cellElement, 1);
     } else if(playerBoard[row][col] === 4) {
         playerBoard[row][col] = 2;
         --numLivesLeft;
@@ -305,12 +338,13 @@ function simulateOpponentGuess() {
                 if (numHitsLeft === 0) {
                     alert("You lost.");
                     storeResults(false);
+                    displayBoard(playerBoard, 'board');
                 }
             }, 1000);
         } else {
             const cellId = row * numRowsAndCols + col;
             const cellElement = document.querySelector(`#board [data-position="${cellId}"]`);
-            updateCellAppearance(cellElement, 2);
+            updateCellAppearancePlayer(cellElement, 2);
         }
     } 
     else {
