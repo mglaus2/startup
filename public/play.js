@@ -80,6 +80,36 @@ function retrieveBoards() {
             }
         }
     } else {
+        loadBoards();
+    }
+}
+
+async function loadBoards() {
+    playerBoard = []
+    opponentBoard = []
+    canGuess = true;
+    numShipsToPlace = 0;
+    numHitsLeft = 0;
+    numLivesLeft = 0;
+
+    try {
+        const response = await fetch('/api/gameStatus');
+        console.log('response');
+        const data = await response.json();
+        console.log(response);
+        playerBoard = data.playerBoard;
+        console.log(playerBoard);
+        opponentBoard = data.opponentBoard;
+        canGuess = data.canGuess;
+        numShipsToPlace = data.numShipsToPlace;
+        numHitsLeft = data.numHitsLeft;
+        numLivesLeft = data.numLivesLeft;
+
+        displayBoard(playerBoard, 'board', handlePlayerCellClickPlacingShips);
+
+        // SAVE SCORES IF WE GO OFFLINE
+    } catch (error) {
+        console.error('Error during fetch:', error);
         // 0 is open cell, 1 is miss, 2 is hit, 3 is sunk ship, and 4 is ship is there but not interacted with
         // WOULD GET OPPONENTS BOARD THROUGH WEB SOCKETS BUT NOW CREATED WITH DUMMY DATA
         playerBoard = createEmptyBoard();
