@@ -28,14 +28,14 @@ async function handleFormSubmission() {
             alert(`Connected with ${opponentName} with GameID: ${gameIDEl.value}`);
             localStorage.setItem("gameID", gameIDEl.value);
             localStorage.setItem("opponentName", opponentName);
-            window.location.href = "play.html";
-        } else {
-            alert('Server Error With Saving GameID');
         }
     } catch (error) {
+        alert('Server Error With Saving GameID');
         console.error("ERROR WITH SERVER:", error);
         localStorage.setItem("gameID", gameIDEl.value);
         localStorage.setItem("opponentName", opponentName);
     }
+
+    window.location.href = "play.html";
     //alert(`Connected with ${opponentName} with GameID: ${gameIDEl.value}`);
 }

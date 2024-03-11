@@ -50,12 +50,22 @@ apiRouter.post('/updateGameStatus', (req, res) => {
     res.send(data);
 });
 
+apiRouter.post('/saveUsername', (req, res) => {
+    console.log('Saving Username');
+    username = req.body.username;
+
+    console.log(username);
+
+    res.json({ message: 'Username saved successfully'});
+});
+
 apiRouter.post('/saveGameID', (req, res) => {
     console.log('Saving Game ID');
     gameID = req.body.gameID;
     opponentName = req.body.opponentName;
 
     console.log(gameID);
+    console.log(opponentName);
 
     res.json({ message: 'Game ID saved successfully' });
 });
