@@ -148,8 +148,6 @@ function displayBoardLogic() {
             setTimeout(() => {
                 simulateOpponentGuess();
             }, 1000);
-            //storeBoards();
-            //saveGameState();
         }
     }
 }
@@ -174,11 +172,8 @@ async function loadBoards() {
             headers: {'content-type': 'application/json'},
             body: JSON.stringify(data),
         });
-        // console.log('response');
         const returnData = await response.json();
-        // console.log(response);
-        playerBoard = returnData.playerBoard;
-        // console.log(playerBoard);
+        playerBoard = returnData.playerBoard;;
         opponentBoard = returnData.opponentBoard;
         canGuess = returnData.canGuess;
         numShipsToPlace = returnData.numShipsToPlace;
@@ -309,7 +304,6 @@ function handlePlayerCellClickGuess(event) {
                     if (numHitsLeft === 0) {
                         alert("YOU WON!");
                         storeResults(true);
-                        //storeBoards();
                         saveGameState();
                         displayBoard(opponentBoard, 'board');
                     } else {
@@ -318,7 +312,6 @@ function handlePlayerCellClickGuess(event) {
                 }, 1000);
             } else {
                 updateCellAppearanceOpponent(event.target, opponentBoard[row][col]);
-                //storeBoards();
                 saveGameState();
                 setTimeout(() => {
                     simulateOpponentGuess();
@@ -329,7 +322,6 @@ function handlePlayerCellClickGuess(event) {
             opponentBoard[row][col] = 1;
             updateCellAppearanceOpponent(event.target, opponentBoard[row][col]);
 
-            //storeBoards();
             saveGameState();
 
             setTimeout(() => {
@@ -397,7 +389,6 @@ finalizeBoardButton.addEventListener('click', () => {
         playerNameEl.textContent = opponentName + '\'s Board';
         displayBoard(opponentBoard, 'board', handlePlayerCellClickGuess);
         finalizeBoardButton.parentNode.removeChild(finalizeBoardButton);
-        //storeBoards();
         saveGameState();
     } else {
         alert("Invalid ships");
@@ -496,7 +487,6 @@ function simulateOpponentGuess() {
 
     canGuess = true;
     saveGameState();
-    //storeBoards();
 }
 
 function handleColorChange() {

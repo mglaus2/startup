@@ -14,7 +14,6 @@ app.use(express.static('public'));
 const apiRouter = express.Router();
 app.use('/api', apiRouter);
 
-// PUT GET AND POST FUNCTIONS
 apiRouter.post('/gameStatus', (req, res) => {
     console.log('Getting Game Status');
     checkGameStatus(req.body);
@@ -147,9 +146,14 @@ function checkGameStatus(gameState) {
     console.log(gameState.gameID);
     console.log(gameState.username);
     console.log(gameState.opponentName);
-    // this is going to check if the game is in the database
+    // this is going to check if the game is in the database 
     // if it is in the database then loads the current state 
     // if it is not in the database it creates an new entry
+
+    // currently since the username is being updated there is
+    // no way to simulate looking for it up in the database and
+    // it only stores one game at a time. Implementing this
+    // is more complex than just storing each game in the database
     if(gameState.gameID !== gameID || gameState.username !== username || gameState.opponentName !== opponentName
         || gameState.gameID === null || gameState.username === null || gameState.opponentName === null) {
         playerBoard = Array.from(Array(numRowsAndCols), () => new Array(numRowsAndCols).fill(0));
