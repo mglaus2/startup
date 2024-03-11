@@ -511,8 +511,20 @@ function handleColorChange() {
     document.documentElement.style.setProperty('--miss-cell-color', missColor);
 }
 
+async function getResults() {
+    
+}
+
+async function storeResults(didWin) {
+    try {
+
+    } catch {
+        storeResultsLocal(didWin);
+    }
+}
+
 // store in database rather than local storage
-function storeResults(didWin) {
+function storeResultsLocal(didWin) {
     let records = [];
     const recordsText = localStorage.getItem('gameRecords');
     if(recordsText) {

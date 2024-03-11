@@ -62,13 +62,39 @@ apiRouter.post('/saveGameID', (req, res) => {
     res.json({ message: 'Game ID saved successfully' });
 });
 
-apiRouter.get('/getGameInfo', (req, res) => {
+apiRouter.get('/getGameInfo', (_req, res) => {
     console.log('Getting Game Info');
 
     data = {
         username: username,
         opponentName: opponentName,
         gameID: gameID,
+    };
+
+    console.log(data);
+
+    res.send(data);
+});
+
+apiRouter.post('/getUsersRecords', (req, res) => {
+    console.log('Getting users records');
+    userRecords = getUsersRecords(req.body, records);
+
+    data = {
+        userRecords: userRecords,
+    };
+
+    console.log(data);
+
+    res.send(data);
+});
+
+apiRouter.get('/getUsername', (_req, res) => {
+    console.log('Getting Username');
+    username = getUsername();
+
+    data = {
+        username: username,
     };
 
     console.log(data);
@@ -96,6 +122,7 @@ let numLivesLeft = null;
 let username = null;
 let opponentName = null;
 let gameID = null;
+let records = [];
 
 function updateGameStatus(gameState) {
     playerBoard = gameState.playerBoard;
@@ -143,4 +170,36 @@ function checkGameStatus(gameState) {
             opponentName = 'Opponent';
         }
     }
+}
+
+function getUsername() {
+    if (username === null) {
+        console.log('SETTING USERNAME IN GET USERNAME');
+        username = 'Mystery Player';
+    }
+
+    return username;
+}
+
+function getUsersRecords(gameInfo, records) {
+    let userRecords = [];
+
+    if (username === null) {
+        console.log('SETTING USERNAME IN GET RECORDS');
+        username = 'Mystery Player';
+    }
+
+    if (records.length) {
+        for (const [i, record] of records.entries()) {
+            if (record.username === gameInfo.username) {
+                userRecords.push(record);
+            }
+        }
+    }
+
+    return userRecords;
+}
+
+function updateRecord(gameResults, records) {
+    
 }
