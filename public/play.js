@@ -1,6 +1,4 @@
 const playerNameEl = document.getElementById('username');
-const username = localStorage.getItem('username') ?? 'Mystery Player';
-const opponentName = localStorage.getItem('opponentName') ?? 'Mystery Player';
 
 const numRowsAndCols = 10;
 let numShipsToPlace = 10;
@@ -9,11 +7,18 @@ let numLivesLeft = 10;
 let canGuess;
 let playerBoard;
 let opponentBoard;
+let username;
+let opponentName;
 let gameID;
 const finalizeBoardButton = document.getElementById('finalize-board-button');
 const generateColorButton = document.getElementById('generate-colors-button');
 
-loadBoards();
+async function init() {
+    await getGameInfo();
+    loadBoards();
+}
+
+init();
 
 finalizeBoardButton.disabled = true;
 
@@ -62,15 +67,10 @@ async function saveGameState() {
         });
 
         const data = await response.json();
-        /*opponentBoard = data.opponentBoard;
-        canGuess = data.canGuess;
-        numShipsToPlace = data.numShipsToPlace;
-        numHitsLeft = data.numHitsLeft;
-        numLivesLeft = data.numLivesLeft;
-        gameID = data.gameID;
-
-        displayBoardLogic();*/
-        console.log('Saved boards in server');
+        const message = data.message;
+        if(message === 'Game Status saved successfully') {
+            console.log('Saved boards in server');
+        }
         storeBoardsLocal();
     } catch {
         storeBoardsLocal();
@@ -161,21 +161,32 @@ async function loadBoards() {
     numShipsToPlace = 0;
     numHitsLeft = 0;
     numLivesLeft = 0;
-    gameID = null;
+
+    const data = {
+        gameID: gameID,
+        username: username,
+        opponentName: opponentName,
+    };
 
     try {
-        const response = await fetch('/api/gameStatus');
+        const response = await fetch('/api/gameStatus', {
+            method: 'POST',
+            headers: {'content-type': 'application/json'},
+            body: JSON.stringify(data),
+        });
         // console.log('response');
-        const data = await response.json();
+        const returnData = await response.json();
         // console.log(response);
-        playerBoard = data.playerBoard;
+        playerBoard = returnData.playerBoard;
         // console.log(playerBoard);
-        opponentBoard = data.opponentBoard;
-        canGuess = data.canGuess;
-        numShipsToPlace = data.numShipsToPlace;
-        numHitsLeft = data.numHitsLeft;
-        numLivesLeft = data.numLivesLeft;
-        gameID = data.gameID;
+        opponentBoard = returnData.opponentBoard;
+        canGuess = returnData.canGuess;
+        numShipsToPlace = returnData.numShipsToPlace;
+        numHitsLeft = returnData.numHitsLeft;
+        numLivesLeft = returnData.numLivesLeft;
+        gameID = returnData.gameID;
+        username = returnData.username;
+        opponentName = returnData.opponentName;
 
         displayBoardLogic();
         console.log('Retrieved Boards from Server');
@@ -186,6 +197,37 @@ async function loadBoards() {
         console.error('Error during fetch:', error);
         retrieveBoardsLocal();
     }
+}
+
+async function getGameInfo() {
+    try {
+        const response = await fetch('/api/getGameInfo');
+        const returnData = await response.json();
+
+        console.log(returnData);
+
+        username = returnData.username;
+        opponentName = returnData.opponentName;
+        gameID = returnData.gameID;
+
+        console.log('Got Game Info from Server');
+        
+        storeGameInfoLocal();
+    } catch {
+        getGameInfoLocal();
+    }
+}
+
+function getGameInfoLocal() {
+    const username = localStorage.getItem('username') ?? 'Mystery Player';
+    const opponentName = localStorage.getItem('opponentName') ?? 'Mystery Player';
+    const gameID = localStorage.getItem('gameID') ?? 'Test GameID';
+}
+
+function storeGameInfoLocal() {
+    localStorage.setItem("username", username);
+    localStorage.setItem("opponentName", opponentName);
+    localStorage.setItem("gameID", gameID);
 }
 
 function displayBoard(board, boardId, cellClickHandler) {
