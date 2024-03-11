@@ -50,6 +50,16 @@ apiRouter.post('/updateGameStatus', (req, res) => {
     res.send(data);
 });
 
+apiRouter.post('/saveGameID', (req, res) => {
+    console.log('Saving Game ID');
+    gameID = req.body.gameID;
+    opponentName = req.body.opponentName;
+
+    console.log(gameID);
+
+    res.json({ message: 'Game ID saved successfully' });
+});
+
 // Return the application's default page if the path is unknown
 app.use((_req, res) => {
     res.sendFile('index.html', { root: 'public' });
@@ -78,7 +88,10 @@ let canGuess = true;
 let numShipsToPlace = 10;
 let numHitsLeft = 10;
 let numLivesLeft = 10;
-let gameID = 'test';
+
+let gameID = 'TEST INPUT';
+let username = 'TEST INPUT'
+let opponentName = 'TEST INPUT';
 
 function updateGameStatus(gameState) {
     playerBoard = gameState.playerBoard;
