@@ -65,7 +65,7 @@ async function loadScores() {
           const winsTdEl = document.createElement('td');
           const lossesTdEl = document.createElement('td');
         
-          opponentTdEl.textContent = record.opponent;
+          opponentTdEl.textContent = record.opponentName;
           winsTdEl.textContent = record.wins;
           lossesTdEl.textContent = record.losses;
 

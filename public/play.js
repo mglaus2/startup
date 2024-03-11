@@ -219,9 +219,9 @@ async function getGameInfo() {
 }
 
 function getGameInfoLocal() {
-    const username = localStorage.getItem('username') ?? 'Mystery Player';
-    const opponentName = localStorage.getItem('opponentName') ?? 'Mystery Player';
-    const gameID = localStorage.getItem('gameID') ?? 'Test GameID';
+    username = localStorage.getItem('username') ?? 'Mystery Player';
+    opponentName = localStorage.getItem('opponentName') ?? 'Mystery Player';
+    gameID = localStorage.getItem('gameID') ?? 'Test GameID';
 }
 
 function storeGameInfoLocal() {
@@ -511,13 +511,27 @@ function handleColorChange() {
     document.documentElement.style.setProperty('--miss-cell-color', missColor);
 }
 
-async function getResults() {
-    
-}
-
 async function storeResults(didWin) {
-    try {
+    console.log('Storing Results');
+    const data = {
+        username: username,
+        opponentName: opponentName,
+        didWin: didWin,
+    };
 
+    try {
+        const response = await fetch('/api/updateRecord', {
+            method: 'POST',
+            headers: {'content-type': 'application/json'},
+            body: JSON.stringify(data),
+        });
+
+        const responseData = await response.json();
+        const message = responseData.message;
+        if(message === 'Users records updated successfully') {
+            console.log('Users records updated in server');
+        }
+        storeResultsLocal(didWin);
     } catch {
         storeResultsLocal(didWin);
     }

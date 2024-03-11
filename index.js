@@ -102,6 +102,15 @@ apiRouter.get('/getUsername', (_req, res) => {
     res.send(data);
 });
 
+apiRouter.post('/updateRecord', (req, res) => {
+    console.log('Updating Record');
+    updateRecord(req.body, records);
+
+    console.log(records);
+
+    res.json({ message: 'Users records updated successfully' });
+});
+
 // Return the application's default page if the path is unknown
 app.use((_req, res) => {
     res.sendFile('index.html', { root: 'public' });
@@ -137,7 +146,7 @@ function updateGameStatus(gameState) {
 function checkGameStatus(gameState) {
     console.log(gameState.gameID);
     console.log(gameState.username);
-    console.log(gameState.opponentname);
+    console.log(gameState.opponentName);
     // this is going to check if the game is in the database
     // if it is in the database then loads the current state 
     // if it is not in the database it creates an new entry
@@ -164,11 +173,15 @@ function checkGameStatus(gameState) {
         if(gameState.gameID === null) {
             console.log('updating gameID');
             gameID = 'TEST INPUT'
-        } else if (gameState.username === null) {
+        }
+        if (gameState.username === null) {
             username = 'Mystery Player'
-        } else if(gameState.opponentName === null) {
+        }
+        if(gameState.opponentName === null) {
             opponentName = 'Opponent';
         }
+    } else{
+        console.log('Getting stored boards');
     }
 }
 
@@ -201,5 +214,36 @@ function getUsersRecords(gameInfo, records) {
 }
 
 function updateRecord(gameResults, records) {
-    
+    let gameRecord = null;
+    console.log(gameResults.username);
+    console.log(gameResults.opponentName);
+    console.log(gameResults.didWin);
+
+    if (records.length) {
+        for (const record of records) {
+            console.log('RECORD:');
+            console.log(record);
+            if (record.username === gameResults.username && record.opponentName === gameResults.opponentName) {
+                console.log('FOUND GAME RECORD');
+                gameRecord = record;
+            }
+        }
+    }
+
+    if (gameRecord === null) {
+        console.log('Creating new record');
+        records.push({
+            username: gameResults.username,
+            opponentName: gameResults.opponentName,
+            wins: gameResults.didWin === true ? 1 : 0,
+            losses: gameResults.didWin === false ? 1 : 0,
+        });
+    } else {
+        console.log('Updating record');
+        if (gameResults.didWin === true) {
+            gameRecord.wins += 1;
+        } else {
+            gameRecord.losses += 1;
+        }
+    }
 }
