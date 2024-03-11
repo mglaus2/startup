@@ -16,7 +16,7 @@ app.use('/api', apiRouter);
 
 // PUT GET AND POST FUNCTIONS
 apiRouter.get('/gameStatus', (_req, res) => {
-    console.log('GAME IS CALLED');
+    console.log('Getting Game Status');
     const data = {
         playerBoard: playerBoard,
         opponentBoard: opponentBoard,
@@ -24,9 +24,29 @@ apiRouter.get('/gameStatus', (_req, res) => {
         numShipsToPlace: numShipsToPlace,
         numHitsLeft: numHitsLeft,
         numLivesLeft: numLivesLeft,
+        gameID: gameID,
     };
 
     console.log(data);
+    res.send(data);
+});
+
+apiRouter.post('/updateGameStatus', (req, res) => {
+    console.log('Saving Game Status');
+    updateGameStatus(req.body);
+
+    const data = {
+        playerBoard: playerBoard,
+        opponentBoard: opponentBoard,
+        canGuess: canGuess,
+        numShipsToPlace: numShipsToPlace,
+        numHitsLeft: numHitsLeft,
+        numLivesLeft: numLivesLeft,
+        gameID: gameID,
+    };
+
+    console.log(data);
+
     res.send(data);
 });
 
@@ -58,3 +78,14 @@ let canGuess = true;
 let numShipsToPlace = 10;
 let numHitsLeft = 10;
 let numLivesLeft = 10;
+let gameID = 'test';
+
+function updateGameStatus(gameState) {
+    playerBoard = gameState.playerBoard;
+    opponentBoard = gameState.opponentBoard;
+    canGuess = gameState.canGuess;
+    numShipsToPlace = gameState.numShipsToPlace;
+    numHitsLeft = gameState.numHitsLeft;
+    numLivesLeft = gameState.numLivesLeft;
+    gameID = gameState.gameID;
+}

@@ -1,7 +1,6 @@
 const playerNameEl = document.getElementById('username');
 const username = localStorage.getItem('username') ?? 'Mystery Player';
 const opponentName = localStorage.getItem('opponentName') ?? 'Mystery Player';
-const gameID = localStorage.getItem('gameID') ?? 'No Game ID';
 
 const numRowsAndCols = 10;
 let numShipsToPlace = 10;
@@ -10,10 +9,11 @@ let numLivesLeft = 10;
 let canGuess;
 let playerBoard;
 let opponentBoard;
+let gameID;
 const finalizeBoardButton = document.getElementById('finalize-board-button');
 const generateColorButton = document.getElementById('generate-colors-button');
 
-retrieveBoards();
+loadBoards();
 
 finalizeBoardButton.disabled = true;
 
@@ -32,7 +32,7 @@ function createEmptyBoard() {
 }
 
 // currently stores boards in local storage with gameID, will store in database based off of gameID
-function storeBoards() {
+function storeBoardsLocal() {
     const playerBoardString = JSON.stringify(playerBoard);
     const opponentBoardString = JSON.stringify(opponentBoard);
 
@@ -43,73 +43,55 @@ function storeBoards() {
     localStorage.setItem(`numHitsLeft_${gameID}`, numHitsLeft);
 }
 
+async function saveGameState() {
+    const gameState = {
+        playerBoard: playerBoard,
+        opponentBoard: opponentBoard,
+        canGuess: canGuess,
+        numShipsToPlace: numShipsToPlace,
+        numHitsLeft: numHitsLeft,
+        numLivesLeft: numLivesLeft,
+        gameID: gameID,
+    };
+
+    try {
+        const response = await fetch('/api/updateGameStatus', {
+            method: 'POST',
+            headers: {'content-type': 'application/json'},
+            body: JSON.stringify(gameState),
+        });
+
+        const data = await response.json();
+        /*opponentBoard = data.opponentBoard;
+        canGuess = data.canGuess;
+        numShipsToPlace = data.numShipsToPlace;
+        numHitsLeft = data.numHitsLeft;
+        numLivesLeft = data.numLivesLeft;
+        gameID = data.gameID;
+
+        displayBoardLogic();*/
+        console.log('Saved boards in server');
+        storeBoardsLocal();
+    } catch {
+        storeBoardsLocal();
+    }
+}
+
 // will pull from database instead of local storage
-function retrieveBoards() {
+function retrieveBoardsLocal() {
     const playerBoardString = localStorage.getItem(`playerBoard_${gameID}`);
     const opponentBoardString = localStorage.getItem(`opponentBoard_${gameID}`);
 
     if (playerBoardString && opponentBoardString) {
-        console.log("GETTING BOARDS");
+        console.log("GETTING BOARDS LOCAL");
         playerBoard = JSON.parse(playerBoardString);
         opponentBoard = JSON.parse(opponentBoardString);
         canGuess = localStorage.getItem(`canGuess_${gameID}`);
         numLivesLeft = parseInt(localStorage.getItem(`numLivesLeft_${gameID}`));
         numHitsLeft = parseInt(localStorage.getItem(`numHitsLeft_${gameID}`));
-        finalizeBoardButton.parentNode.removeChild(finalizeBoardButton);
 
-        if(canGuess) {
-            console.log("CAN GUESS");
-            console.log(numLivesLeft);
-            console.log(numHitsLeft);
-            playerNameEl.textContent = opponentName + '\'s Board';
-            if(numLivesLeft === 0 || numHitsLeft === 0) {
-                console.log("GAME OVER");
-                displayBoard(opponentBoard, 'board');
-            } else {
-                displayBoard(opponentBoard, 'board', handlePlayerCellClickGuess);
-            }
-        } else {
-            if(numLivesLeft === 0 || numHitsLeft === 0) {
-                print("GAME OVER");
-                displayBoard(playerBoard, 'board');
-            } else {
-                setTimeout(() => {
-                    simulateOpponentGuess();
-                }, 1000);
-                storeBoards();
-            }
-        }
+        displayBoardLogic();
     } else {
-        loadBoards();
-    }
-}
-
-async function loadBoards() {
-    playerBoard = []
-    opponentBoard = []
-    canGuess = true;
-    numShipsToPlace = 0;
-    numHitsLeft = 0;
-    numLivesLeft = 0;
-
-    try {
-        const response = await fetch('/api/gameStatus');
-        console.log('response');
-        const data = await response.json();
-        console.log(response);
-        playerBoard = data.playerBoard;
-        console.log(playerBoard);
-        opponentBoard = data.opponentBoard;
-        canGuess = data.canGuess;
-        numShipsToPlace = data.numShipsToPlace;
-        numHitsLeft = data.numHitsLeft;
-        numLivesLeft = data.numLivesLeft;
-
-        displayBoard(playerBoard, 'board', handlePlayerCellClickPlacingShips);
-
-        // SAVE SCORES IF WE GO OFFLINE
-    } catch (error) {
-        console.error('Error during fetch:', error);
         // 0 is open cell, 1 is miss, 2 is hit, 3 is sunk ship, and 4 is ship is there but not interacted with
         // WOULD GET OPPONENTS BOARD THROUGH WEB SOCKETS BUT NOW CREATED WITH DUMMY DATA
         playerBoard = createEmptyBoard();
@@ -126,8 +108,83 @@ async function loadBoards() {
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
         ];
         canGuess = true;
-        playerNameEl.textContent = username + '\'s Board';
-        displayBoard(playerBoard, 'board', handlePlayerCellClickPlacingShips);
+    }
+}
+
+function displayBoardLogic() {
+    if(canGuess) {
+        console.log("CAN GUESS");
+        console.log(numLivesLeft);
+        console.log(numHitsLeft);
+        playerNameEl.textContent = opponentName + '\'s Board';
+        if(numLivesLeft === 0 || numHitsLeft === 0) {
+            console.log("GAME OVER");
+            finalizeBoardButton.parentNode.removeChild(finalizeBoardButton);
+            displayBoard(opponentBoard, 'board');
+        } else if(numShipsToPlace === 10) {
+            playerNameEl.textContent = username + '\'s Board';
+            displayBoard(playerBoard, 'board', handlePlayerCellClickPlacingShips);
+        }
+        else {
+            finalizeBoardButton.parentNode.removeChild(finalizeBoardButton);
+            displayBoard(opponentBoard, 'board', handlePlayerCellClickGuess);
+        }
+    } else {
+        finalizeBoardButton.parentNode.removeChild(finalizeBoardButton);
+        if(numLivesLeft === 0) {
+            console.log("GAME OVER");
+            displayBoard(playerBoard, 'board');
+            setTimeout(() => {
+                alert("You lost this game!");
+            }, 1000);
+        } else if(numHitsLeft === 0) {
+            console.log('YOU WON THIS GAME');
+            displayBoard(opponentBoard, 'board');
+            setTimeout(() => {
+                alert("You won this game!");
+            }, 1000);
+        } 
+        else {
+            setTimeout(() => {
+                simulateOpponentGuess();
+            }, 1000);
+            //storeBoards();
+            //saveGameState();
+        }
+    }
+}
+
+async function loadBoards() {
+    playerBoard = []
+    opponentBoard = []
+    canGuess = true;
+    numShipsToPlace = 0;
+    numHitsLeft = 0;
+    numLivesLeft = 0;
+    gameID = null;
+
+    try {
+        const response = await fetch('/api/gameStatus');
+        // console.log('response');
+        const data = await response.json();
+        // console.log(response);
+        playerBoard = data.playerBoard;
+        // console.log(playerBoard);
+        opponentBoard = data.opponentBoard;
+        canGuess = data.canGuess;
+        numShipsToPlace = data.numShipsToPlace;
+        numHitsLeft = data.numHitsLeft;
+        numLivesLeft = data.numLivesLeft;
+        gameID = data.gameID;
+
+        displayBoardLogic();
+        console.log('Retrieved Boards from Server');
+
+        // SAVE SCORES IF WE GO OFFLINE
+        storeBoardsLocal();
+    } catch (error) {
+        console.error('Error during fetch:', error);
+        retrieveBoardsLocal();
     }
 }
 
@@ -210,7 +267,8 @@ function handlePlayerCellClickGuess(event) {
                     if (numHitsLeft === 0) {
                         alert("YOU WON!");
                         storeResults(true);
-                        storeBoards();
+                        //storeBoards();
+                        saveGameState();
                         displayBoard(opponentBoard, 'board');
                     } else {
                         simulateOpponentGuess();
@@ -218,7 +276,8 @@ function handlePlayerCellClickGuess(event) {
                 }, 1000);
             } else {
                 updateCellAppearanceOpponent(event.target, opponentBoard[row][col]);
-                storeBoards();
+                //storeBoards();
+                saveGameState();
                 setTimeout(() => {
                     simulateOpponentGuess();
                 }, 1000);
@@ -228,7 +287,8 @@ function handlePlayerCellClickGuess(event) {
             opponentBoard[row][col] = 1;
             updateCellAppearanceOpponent(event.target, opponentBoard[row][col]);
 
-            storeBoards();
+            //storeBoards();
+            saveGameState();
 
             setTimeout(() => {
                 simulateOpponentGuess();
@@ -295,7 +355,8 @@ finalizeBoardButton.addEventListener('click', () => {
         playerNameEl.textContent = opponentName + '\'s Board';
         displayBoard(opponentBoard, 'board', handlePlayerCellClickGuess);
         finalizeBoardButton.parentNode.removeChild(finalizeBoardButton);
-        storeBoards();
+        //storeBoards();
+        saveGameState();
     } else {
         alert("Invalid ships");
     }
@@ -385,13 +446,15 @@ function simulateOpponentGuess() {
         simulateOpponentGuess();
     }
 
-    storeBoards();
-
     setTimeout(() => {
         playerNameEl.textContent = opponentName + '\'s Board';
         displayBoard(opponentBoard, 'board', handlePlayerCellClickGuess);
-        canGuess = true;
+        //canGuess = true;
     }, 5000);
+
+    canGuess = true;
+    saveGameState();
+    //storeBoards();
 }
 
 function handleColorChange() {
