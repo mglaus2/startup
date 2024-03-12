@@ -62,7 +62,7 @@ For this deliverable I built out the structure of my application using HTML.
 [x] - done - 20% JavaScript support for future WebSocket. Currently I simulate the connection to an opponent and then used dummy data for the opponents board. I created an algorithm to simulate your opponent guessing. This will be replaced with Web Socket to connect with an opponent and updates based on you and your opponents moves.  
 [x] - done - 40% JavaScript support for your application's interaction logic. Currently everything works and interacts as expected. The login updates the username, the gameID changes the game being played, and the board is fully operational with placing 10 ships, guessing on the opponents board, and error checking of ship placement and guessing. Then the leaderboard is updated based on the results of the game.  
 
-## Startup Deliverable
+## Service Deliverable
 
 [x] - done - Prerequisite: Simon JavaScript deployed to your production environment.  
 [x] - done - Prerequisite: A link to your GitHub startup repository prominently displayed on your application's home page.  
@@ -70,6 +70,6 @@ For this deliverable I built out the structure of my application using HTML.
 [x] - done - Prerequisite: At least 10 git commits spread consistently throughout the assignment period.  
 [x] - Create an HTTP service using Node.js and Express. Done!  
 [x] - Frontend served up using Express static middleware. Done!  
-[x] - Your frontend calls third party service endpoints. My frontend calls Colormind API to generate a color scheme for the battleship board. It is called when you press the generate contrasting color button on the current game page.  
+[x] - Your frontend calls third party service endpoints. My frontend calls The Color API to generate a color scheme for the battleship board. It bases the color scheme off the Open Space Color. It is called when you press the generate contrasting color button on the current game page.  
 [x] - Your backend provides service endpoints. Service endpoints for saving and getting game status, updating and getting a users record, and getting information about the user and their opponent. Placeholders for login that stores the current user on the server.  
 [x] - Your frontend calls your service endpoints. I did this with all of my endpoints using the fetch function.  

@@ -556,49 +556,53 @@ function storeResultsLocal(didWin) {
     localStorage.setItem('gameRecords', JSON.stringify(records));
 }
 
-generateColorButton.addEventListener('click', () => {
-    console.log('PRESSED GENERATE COLOR');
+async function generateColors() {
     const openColor = openColorInput.value;
     const hexValues = openColor.match(/[0-9a-fA-F]{2}/g);
     const r = parseInt(hexValues[0], 16);
     const g = parseInt(hexValues[1], 16);
     const b = parseInt(hexValues[2], 16);
     
-    const url = "http://colormind.io/api/";
-    var data = {
-        model: "default",
-        input: [[r, g, b], "N", "N", "N"]
+    const colorAPIUrl = 'https://www.thecolorapi.com/scheme';
+
+    const params = {
+        hex: openColor,
+        mode: 'analogic-complement',
+        count: 4,
     };
 
-    fetch(url, {
-        method: "POST",
-        body: JSON.stringify(data),
-    })
-    .then((response) => response.json())
-    .then((jsonResponse) => {
-        console.log(jsonResponse);
-        const shipColor = rgbToHex(jsonResponse.result[1][0], jsonResponse.result[1][1], jsonResponse.result[1][2]);
-        document.documentElement.style.setProperty('--ship-cell-color', shipColor);
-        shipColorInput.value = shipColor;
+    const queryString = Object.keys(params)
+        .map(key => encodeURIComponent(key) + '=' + encodeURIComponent(params[key]))
+        .join('&');
 
-        const hitColor = rgbToHex(jsonResponse.result[2][0], jsonResponse.result[2][1], jsonResponse.result[2][2]);        
-        document.documentElement.style.setProperty('--hit-cell-color', hitColor);
-        hitColorInput.value = hitColor;
+    const apiUrlWithParams = `${colorAPIUrl}?${queryString}`;
 
-        const missColor = rgbToHex(jsonResponse.result[3][0], jsonResponse.result[3][1], jsonResponse.result[3][2]);
-        document.documentElement.style.setProperty('--miss-cell-color', missColor);
-        missColorInput.value = missColor;
-    })
-    .catch((error) => {
-        console.error("Error fetching color:", error);
-    });
-});
-
-function rgbToHex(r, g, b) {
-    const toHex = (value) => {
-        const hex = value.toString(16);
-        return hex.length === 1 ? '0' + hex : hex;
-    };
-
-    return '#' + toHex(r) + toHex(g) + toHex(b);
+    fetch(apiUrlWithParams)
+        .then(response => response.json())
+        .then(data => setColors(data))
+        .catch(error => console.error('Error:', error));
 }
+
+function setColors(data) {
+    console.log(data);
+    console.log(data.colors[1].hex.value)
+
+    const shipColor = data.colors[1].hex.value;
+    const hitColor = data.colors[2].hex.value;
+    const missColor = data.colors[3].hex.value;
+
+
+    document.documentElement.style.setProperty('--ship-cell-color', shipColor);
+    shipColorInput.value = shipColor;
+
+    document.documentElement.style.setProperty('--hit-cell-color', hitColor);
+    hitColorInput.value = hitColor;
+
+    document.documentElement.style.setProperty('--miss-cell-color', missColor);
+    missColorInput.value = missColor;
+}
+
+generateColorButton.addEventListener('click', () => {
+    console.log('PRESSED GENERATE COLOR');
+    generateColors();
+});

@@ -130,6 +130,8 @@ let numLivesLeft = null;
 let username = null;
 let opponentName = null;
 let gameID = null;
+let currGameID = null;
+let currUsername = null;
 let records = [];
 
 function updateGameStatus(gameState) {
@@ -154,7 +156,7 @@ function checkGameStatus(gameState) {
     // no way to simulate looking for it up in the database and
     // it only stores one game at a time. Implementing this
     // is more complex than just storing each game in the database
-    if(gameState.gameID !== gameID || gameState.username !== username || gameState.opponentName !== opponentName
+    if(gameState.gameID !== currGameID || gameState.username !== currUsername || gameState.opponentName !== opponentName
         || gameState.gameID === null || gameState.username === null || gameState.opponentName === null) {
         playerBoard = Array.from(Array(numRowsAndCols), () => new Array(numRowsAndCols).fill(0));
         opponentBoard = [
@@ -184,6 +186,8 @@ function checkGameStatus(gameState) {
         if(gameState.opponentName === null) {
             opponentName = 'Opponent';
         }
+        currGameID = gameID;
+        currUsername = username;
     } else{
         console.log('Getting stored boards');
     }
