@@ -27,7 +27,7 @@ app.use('/api', apiRouter);
 
 // CreateAuth token for a new user
 apiRouter.post('/auth/create', async (req, res) => {
-    console.log("Trying to create user")
+    console.log("Trying to create user");
     if (await DB.getUser(req.body.email)) {
       res.status(409).send({ msg: 'Existing user' });
     } else {
@@ -40,6 +40,41 @@ apiRouter.post('/auth/create', async (req, res) => {
         id: user._id,
       });
     }
+});
+
+// GetAuth token for the provided credentials
+apiRouter.post('/auth/login', async (req, res) => {
+    console.log("Trying to log user in");
+    const user = await DB.getUser(req.body.email);
+    if (user) {
+        console.log('User exists');
+        if (await bcrypt.compare(req.body.password, user.password)) {
+            setAuthCookie(res, user.token);
+            res.send({ id: user._id });
+            return;
+        }
+        console.log('Passwords do not match');
+    }
+    res.status(401).send({ msg: 'Unauthorized' });
+});
+
+// DeleteAuth token if stored in cookie
+apiRouter.delete('/auth/logout', (_req, res) => {
+    console.log('Logging out user');
+    res.clearCookie(authCookieName);
+    res.status(204).end();
+});
+  
+// GetUser returns information about a user
+apiRouter.get('/user/:email', async (req, res) => {
+    console.log("Getting users email and token");
+    const user = await DB.getUser(req.params.email);
+    if (user) {
+      const token = req?.cookies.token;
+      res.send({ email: user.email, authenticated: token === user.token });
+      return;
+    }
+    res.status(404).send({ msg: 'Unknown' });
 });
 
 apiRouter.post('/gameStatus', (req, res) => {
@@ -142,6 +177,15 @@ apiRouter.post('/updateRecord', (req, res) => {
 app.use((_req, res) => {
     res.sendFile('index.html', { root: 'public' });
 });
+
+// setAuthCookie in the HTTP response
+function setAuthCookie(res, authToken) {
+    res.cookie(authCookieName, authToken, {
+        secure: true,
+        httpOnly: true,
+        sameSite: 'strict',
+    });
+}
 
 app.listen(port, () => {
     console.log(`Listening on port ${port}`);

@@ -21,6 +21,10 @@ function getUser(email) {
     return userCollection.findOne({ email: email });
 }
 
+function getUserByToken(token) {
+    return userCollection.findOne({ token: token });
+}
+
 async function createUser(email, password) {
     // Hash the password before we insert it into the database
     const passwordHash = await bcrypt.hash(password, 10);
@@ -37,5 +41,6 @@ async function createUser(email, password) {
 
 module.exports = {
     getUser,
+    getUserByToken,
     createUser,
 };
