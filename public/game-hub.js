@@ -16,7 +16,7 @@ async function handleFormSubmission() {
         gameID: gameIDEl.value,
     };
 
-    const response = await fetch('/api/joinGame', {
+    const response = await fetch('/api/game/join', {
         method: 'POST',
         headers: {'content-type': 'application/json'},
         body: JSON.stringify(data),
@@ -38,10 +38,13 @@ async function handleFormSubmission() {
 }
 
 function storeGameStateLocal(returnData, gameID) {
+    const hostBoardString = JSON.stringify(returnData.hostBoard);
+    const opponentBoardString = JSON.stringify(returnData.opponentBoard);
+
     localStorage.setItem('gameID', gameID);
     localStorage.setItem('opponentName', returnData.opponentName);
-    localStorage.setItem('hostBoard', returnData.hostBoard);
-    localStorage.setItem('opponentBoard', returnData.opponentBoard);
+    localStorage.setItem('hostBoard', hostBoardString);
+    localStorage.setItem('opponentBoard', opponentBoardString);
     localStorage.setItem('turn', returnData.turn);
     localStorage.setItem('numShipsToPlaceHost', returnData.numShipsToPlaceHost);
     localStorage.setItem('numShipsToPlaceOpponent', returnData.numShipsToPlaceOpponent);

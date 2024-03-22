@@ -96,7 +96,7 @@ secureApiRouter.use(async (req, res, next) => {
 });
 
 // request needs username and gameID
-secureApiRouter.post('/joinGame', async (req, res) => {
+secureApiRouter.post('/game/join', async (req, res) => {
     let gameState = await DB.getGame(req.body.gameID);
     if (gameState) {
         console.log('Joining Game with GameID:', req.body.gameID);
@@ -134,6 +134,27 @@ secureApiRouter.post('/joinGame', async (req, res) => {
             numHostLivesLeft: gameState.numHostLivesLeft,
             numOpponentLivesLeft: gameState.numOpponentLivesLeft,
         });
+    }
+});
+
+secureApiRouter.post('/game/storeStatus', async (req, res) => {
+    console.log("Storing Current Game Status");
+    console.log("GameID:", req.body.gameID);
+    let gameState = await DB.getGame(req.body.gameID);
+    const hostname = gameState.hostname;
+    const opponentName = gameState.opponentName;
+    const username = req.body.hostname;
+    console.log('Username:', username);
+    console.log('Hostname:', hostname);
+    console.log('Opponent name:', opponentName);
+
+    console.log(gameState);
+    console.log(req.body);
+    if(username === hostname || username === opponentName) {
+        await DB.storeGameStatus(req.body.gameID, req.body, username);
+        res.status(204).send({ msg: "Game Status Updated in DB" });
+    } else {
+        res.status(401).send({ msg: 'You are not host or opponent in this game' });
     }
 });
 

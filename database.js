@@ -83,10 +83,51 @@ async function createGame(username, gameID) {
     return gameState;
 }
 
+async function storeGameStatus(gameID, currGameState, username) {
+    console.log("Storing Game Status in DB");
+    console.log("GameID:", gameID);
+
+    const filter = { gameID : gameID };
+    let gameState;
+    const hostname = currGameState.hostname;
+    const opponentName = currGameState.opponentName;
+
+    if (username === hostname) {
+        console.log('Username matched with hostname');
+        gameState = {
+            hostBoard: currGameState.hostBoard,
+            opponentBoard: currGameState.opponentBoard,
+            turn: currGameState.turn,
+            numShipsToPlaceHost: currGameState.numShipsToPlaceHost,
+            numShipsToPlaceOpponent: currGameState.numShipsToPlaceOpponent,
+            numHostLivesLeft: currGameState.numHostLivesLeft,
+            numOpponentLivesLeft: currGameState.numOpponentLivesLeft,
+        };
+    } else if (username === opponentName) {
+        console.log('Username matched with opponentName');
+        gameState = {
+            hostBoard: currGameState.opponentBoard,
+            opponentBoard: currGameState.playerBoard,
+            turn: currGameState.turn,
+            numShipsToPlaceHost: currGameState.numShipsToPlaceOpponent,
+            numShipsToPlaceOpponent: currGameState.numShipsToPlaceHost,
+            numHostLivesLeft: currGameState.numOpponentLivesLeft,
+            numOpponentLivesLeft: currGameState.numHostLivesLeft,
+        };
+    }
+
+    console.log("Game State:", gameState);
+
+    await gameCollection.updateOne(filter, { $set: gameState });
+
+    return gameState;
+}
+
 module.exports = {
     getUser,
     getUserByToken,
     createUser,
     getGame,
     createGame,
+    storeGameStatus,
 };
