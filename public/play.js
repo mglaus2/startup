@@ -21,7 +21,7 @@ let numHostLivesLeft;
 let numOpponentLivesLeft;
 
 async function init() {
-    retrieveBoardsLocal();
+    await loadBoards();
 }
 
 init();
@@ -90,23 +90,6 @@ async function saveGameState() {
         const msgModal = new bootstrap.Modal(modalEl, {});
         msgModal.show();
     }
-
-    try {
-        const response = await fetch('/api/game/storeStatus', {
-            method: 'POST',
-            headers: {'content-type': 'application/json'},
-            body: JSON.stringify(gameState),
-        });
-
-        const data = await response.json();
-        const message = data.message;
-        if(message === 'Game Status saved successfully') {
-            console.log('Saved boards in server');
-        }
-        storeBoardsLocal();
-    } catch {
-        storeBoardsLocal();
-    }
 }
 
 // will pull from database instead of local storage
@@ -128,40 +111,6 @@ function retrieveBoardsLocal() {
 
     displayBoardLogic();
 }
-
-// will pull from database instead of local storage
-/*function retrieveBoardsLocal() {
-    const playerBoardString = localStorage.getItem(`playerBoard_${gameID}`);
-    const opponentBoardString = localStorage.getItem(`opponentBoard_${gameID}`);
-
-    if (playerBoardString && opponentBoardString) {
-        console.log("GETTING BOARDS LOCAL");
-        playerBoard = JSON.parse(playerBoardString);
-        opponentBoard = JSON.parse(opponentBoardString);
-        canGuess = localStorage.getItem(`canGuess_${gameID}`);
-        numLivesLeft = parseInt(localStorage.getItem(`numLivesLeft_${gameID}`));
-        numHitsLeft = parseInt(localStorage.getItem(`numHitsLeft_${gameID}`));
-
-        displayBoardLogic();
-    } else {
-        // 0 is open cell, 1 is miss, 2 is hit, 3 is sunk ship, and 4 is ship is there but not interacted with
-        // WOULD GET OPPONENTS BOARD THROUGH WEB SOCKETS BUT NOW CREATED WITH DUMMY DATA
-        playerBoard = createEmptyBoard();
-        opponentBoard = [
-            [0, 4, 4, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 4, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 4, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 4, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 4, 0, 0, 0, 0, 0, 0],
-            [0, 0, 4, 4, 4, 0, 0, 0, 0, 0],
-            [0, 0, 0, 4, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        ];
-        canGuess = true;
-    }
-}*/
 
 function displayBoardLogic() {
     if (turn === 'Placing Ships') {
@@ -197,119 +146,46 @@ function displayBoardLogic() {
             }, 1000);
         }
     }
-
-
-    /*if(canGuess) {
-        console.log("CAN GUESS");
-        console.log(numLivesLeft);
-        console.log(numHitsLeft);
-        playerNameEl.textContent = opponentName + '\'s Board';
-        if(numLivesLeft === 0 || numHitsLeft === 0) {
-            console.log("GAME OVER");
-            finalizeBoardButton.parentNode.removeChild(finalizeBoardButton);
-            displayBoard(opponentBoard, 'board');
-        } else if(numShipsToPlace === 10) {
-            playerNameEl.textContent = username + '\'s Board';
-            displayBoard(playerBoard, 'board', handlePlayerCellClickPlacingShips);
-        }
-        else {
-            finalizeBoardButton.parentNode.removeChild(finalizeBoardButton);
-            displayBoard(opponentBoard, 'board', handlePlayerCellClickGuess);
-        }
-    } else {
-        finalizeBoardButton.parentNode.removeChild(finalizeBoardButton);
-        if(numLivesLeft === 0) {
-            console.log("GAME OVER");
-            displayBoard(playerBoard, 'board');
-            setTimeout(() => {
-                alert("You lost this game!");
-            }, 1000);
-        } else if(numHitsLeft === 0) {
-            console.log('YOU WON THIS GAME');
-            displayBoard(opponentBoard, 'board');
-            setTimeout(() => {
-                alert("You won this game!");
-            }, 1000);
-        } 
-        else {
-            setTimeout(() => {
-                simulateOpponentGuess();
-            }, 1000);
-        }
-    }*/
 }
-// Do not use since loaded in game-hub and use local data
+
 async function loadBoards() {
-    playerBoard = []
-    opponentBoard = []
-    canGuess = true;
-    numShipsToPlace = 0;
-    numHitsLeft = 0;
-    numLivesLeft = 0;
+    username = localStorage.getItem('username');
+    gameID = localStorage.getItem('gameID');
 
     const data = {
         gameID: gameID,
         username: username,
-        opponentName: opponentName,
     };
 
-    try {
-        const response = await fetch('/api/gameStatus', {
-            method: 'POST',
-            headers: {'content-type': 'application/json'},
-            body: JSON.stringify(data),
-        });
+    const response = await fetch('/api/game/getStatus', {
+        method: 'POST',
+        headers: {'content-type': 'application/json'},
+        body: JSON.stringify(data),
+    });
+
+    if (response.ok) {
         const returnData = await response.json();
-        playerBoard = returnData.playerBoard;
-        opponentBoard = returnData.opponentBoard;
-        canGuess = returnData.canGuess;
-        numShipsToPlace = returnData.numShipsToPlace;
-        numHitsLeft = returnData.numHitsLeft;
-        numLivesLeft = returnData.numLivesLeft;
-        gameID = returnData.gameID;
-        username = returnData.username;
         opponentName = returnData.opponentName;
+        playerBoard = returnData.hostBoard;
+        opponentBoard = returnData.opponentBoard;
+        turn = returnData.turn;
+        numShipsToPlaceHost = returnData.numShipsToPlaceHost;
+        numShipsToPlaceOpponent = returnData.numShipsToPlaceOpponent;
+        numHostLivesLeft = returnData.numHostLivesLeft;
+        numOpponentLivesLeft = returnData.numOpponentLivesLeft;
 
         displayBoardLogic();
         console.log('Retrieved Boards from Server');
 
         // SAVE SCORES IF WE GO OFFLINE
         storeBoardsLocal();
-    } catch (error) {
-        console.error('Error during fetch:', error);
-        retrieveBoardsLocal();
-    }
-}
-
-async function getGameInfo() {
-    try {
-        const response = await fetch('/api/getGameInfo');
+    } else {
         const returnData = await response.json();
-
-        console.log(returnData);
-
-        username = returnData.username;
-        opponentName = returnData.opponentName;
-        gameID = returnData.gameID;
-
-        console.log('Got Game Info from Server');
-        
-        storeGameInfoLocal();
-    } catch {
-        getGameInfoLocal();
+        const modalEl = document.querySelector('#msgModal');
+        modalEl.querySelector('.modal-body').textContent = `⚠ Error: ${returnData.msg}`;
+        const msgModal = new bootstrap.Modal(modalEl, {});
+        msgModal.show();
     }
-}
-
-function getGameInfoLocal() {
-    username = localStorage.getItem('username') ?? 'Mystery Player';
-    opponentName = localStorage.getItem('opponentName') ?? 'Mystery Player';
-    gameID = localStorage.getItem('gameID') ?? 'Test GameID';
-}
-
-function storeGameInfoLocal() {
-    localStorage.setItem("username", username);
-    localStorage.setItem("opponentName", opponentName);
-    localStorage.setItem("gameID", gameID);
 }
 
 function displayBoard(board, boardId, cellClickHandler) {

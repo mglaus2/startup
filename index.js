@@ -158,6 +158,35 @@ secureApiRouter.post('/game/storeStatus', async (req, res) => {
     }
 });
 
+secureApiRouter.post('/game/getStatus', async (req, res) => {
+    console.log("Getting game status");
+    const gameState = await DB.getGame(req.body.gameID);
+    if (gameState) {
+        console.log('Getting Status with GameID:', req.body.gameID);
+        console.log('Hostname', gameState.hostname);
+        console.log('Username:', req.body.username);
+        const hostname = gameState.hostname;
+        const username = req.body.username;
+        // add to check for opponent after websocket since we will only be storing 1 version of the game?
+        if(hostname === username) {
+            res.send({ 
+                opponentName: gameState.opponentName,
+                hostBoard: gameState.hostBoard,
+                opponentBoard: gameState.opponentBoard,
+                turn: gameState.turn,
+                numShipsToPlaceHost: gameState.numShipsToPlaceHost,
+                numShipsToPlaceOpponent: gameState.numShipsToPlaceOpponent,
+                numHostLivesLeft: gameState.numHostLivesLeft,
+                numOpponentLivesLeft: gameState.numOpponentLivesLeft,
+            });
+        } else {
+            res.status(401).send({ msg: 'You are not host to this GameID' });
+        }
+    } else {
+        res.status(401).send({ msg: 'Game Does Not Exist' });
+    }
+});
+
 apiRouter.post('/gameStatus', (req, res) => {
     console.log('Getting Game Status');
     checkGameStatus(req.body);
