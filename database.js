@@ -45,7 +45,7 @@ async function getGame(gameID) {
 }
 
 async function createGame(username, gameID) {
-    let hostBoard = Array.from(Array(numRowsAndCols), () => new Array(numRowsAndCols).fill(0));
+    let hostBoard = Array.from(Array(10), () => new Array(10).fill(0));
     let opponentBoard = [
         [0, 4, 4, 0, 0, 0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -63,7 +63,7 @@ async function createGame(username, gameID) {
     let numShipsToPlaceOpponent = 0;
     let numHostLivesLeft = 10;
     let numOpponentLivesLeft = 10;
-    let opponentName = 'Opponent';
+    let opponentName = 'Computer';
 
     const gameState = {
         gameID: gameID,

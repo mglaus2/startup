@@ -97,9 +97,9 @@ secureApiRouter.use(async (req, res, next) => {
 
 // request needs username and gameID
 secureApiRouter.post('/joinGame', async (req, res) => {
-    const gameState = await DB.getGame(req.body.gameID);
+    let gameState = await DB.getGame(req.body.gameID);
     if (gameState) {
-        console.log('Joining Game with GameID:', gameID);
+        console.log('Joining Game with GameID:', req.body.gameID);
         res.send({ 
             opponentName: gameState.opponentName,
             hostBoard: gameState.hostBoard,
@@ -111,7 +111,7 @@ secureApiRouter.post('/joinGame', async (req, res) => {
             numOpponentLivesLeft: gameState.numOpponentLivesLeft,
         });
     } else {
-        console.log('Creating Game with GameID:', gameID);
+        console.log('Creating Game with GameID:', req.body.gameID);
         gameState = await DB.createGame(req.body.username, req.body.gameID);
         res.send({ 
             opponentName: gameState.opponentName,
