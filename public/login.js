@@ -15,8 +15,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 });
 
-
-
 async function loginUser() {
     loginOrCreate('/api/auth/login');
 }
@@ -38,7 +36,7 @@ async function loginOrCreate(endpoint) {
     }
 
     const data = {
-        email: usernameEl.value,
+        username: usernameEl.value,
         password: passwordEl.value,
     };
 

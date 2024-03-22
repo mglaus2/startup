@@ -28,10 +28,10 @@ app.use('/api', apiRouter);
 // CreateAuth token for a new user
 apiRouter.post('/auth/create', async (req, res) => {
     console.log("Trying to create user");
-    if (await DB.getUser(req.body.email)) {
+    if (await DB.getUser(req.body.username)) {
       res.status(409).send({ msg: 'Existing user' });
     } else {
-      const user = await DB.createUser(req.body.email, req.body.password);
+      const user = await DB.createUser(req.body.username, req.body.password);
   
       // Set the cookie
       setAuthCookie(res, user.token);
@@ -45,12 +45,13 @@ apiRouter.post('/auth/create', async (req, res) => {
 // GetAuth token for the provided credentials
 apiRouter.post('/auth/login', async (req, res) => {
     console.log("Trying to log user in");
-    const user = await DB.getUser(req.body.email);
+    const user = await DB.getUser(req.body.username);
     if (user) {
-        console.log('User exists');
+        console.log('User exists:', user.token);
         if (await bcrypt.compare(req.body.password, user.password)) {
             setAuthCookie(res, user.token);
             res.send({ id: user._id });
+            console.log("authcookiename:", authCookieName);
             return;
         }
         console.log('Passwords do not match');
@@ -66,15 +67,63 @@ apiRouter.delete('/auth/logout', (_req, res) => {
 });
   
 // GetUser returns information about a user
-apiRouter.get('/user/:email', async (req, res) => {
-    console.log("Getting users email and token");
-    const user = await DB.getUser(req.params.email);
+apiRouter.get('/user/:username', async (req, res) => {
+    console.log("Getting username and token");
+    const user = await DB.getUser(req.params.username);
     if (user) {
       const token = req?.cookies.token;
-      res.send({ email: user.email, authenticated: token === user.token });
+      res.send({ username: user.username, authenticated: token === user.token });
       return;
     }
     res.status(404).send({ msg: 'Unknown' });
+});
+
+// secureApiRouter verifies credentials for endpoints
+var secureApiRouter = express.Router();
+apiRouter.use(secureApiRouter);
+
+secureApiRouter.use(async (req, res, next) => {
+    console.log("Checking authtoken");
+    authToken = req.cookies[authCookieName];
+    console.log("Authtoken:", authToken);
+    const user = await DB.getUserByToken(authToken);
+    console.log("User:", user);
+    if (user) {
+      next();
+    } else {
+      res.status(401).send({ msg: 'Unauthorized' });
+    }
+});
+
+// request needs username and gameID
+secureApiRouter.post('/joinGame', async (req, res) => {
+    const gameState = await DB.getGame(req.body.gameID);
+    if (gameState) {
+        console.log('Joining Game with GameID:', gameID);
+        res.send({ 
+            opponentName: gameState.opponentName,
+            hostBoard: gameState.hostBoard,
+            opponentBoard: gameState.opponentBoard,
+            turn: gameState.turn,
+            numShipsToPlaceHost: gameState.numShipsToPlaceHost,
+            numShipsToPlaceOpponent: gameState.numShipsToPlaceOpponent,
+            numHostLivesLeft: gameState.numHostLivesLeft,
+            numOpponentLivesLeft: gameState.numOpponentLivesLeft,
+        });
+    } else {
+        console.log('Creating Game with GameID:', gameID);
+        gameState = await DB.createGame(req.body.username, req.body.gameID);
+        res.send({ 
+            opponentName: gameState.opponentName,
+            hostBoard: gameState.hostBoard,
+            opponentBoard: gameState.opponentBoard,
+            turn: gameState.turn,
+            numShipsToPlaceHost: gameState.numShipsToPlaceHost,
+            numShipsToPlaceOpponent: gameState.numShipsToPlaceOpponent,
+            numHostLivesLeft: gameState.numHostLivesLeft,
+            numOpponentLivesLeft: gameState.numOpponentLivesLeft,
+        });
+    }
 });
 
 apiRouter.post('/gameStatus', (req, res) => {
@@ -171,6 +220,11 @@ apiRouter.post('/updateRecord', (req, res) => {
     console.log(records);
 
     res.json({ message: 'Users records updated successfully' });
+});
+
+// Default error handler
+app.use(function (err, req, res, next) {
+    res.status(500).send({ type: err.name, message: err.message });
 });
 
 // Return the application's default page if the path is unknown
