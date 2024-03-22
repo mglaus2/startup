@@ -1,6 +1,7 @@
 async function handleFormSubmission() {
     const gameIDEl = document.getElementById('gameID');
     const username = localStorage.getItem('username');
+    console.log(username);
 
     if (!gameIDEl.value) {
         alert("Please enter a GameID");
@@ -15,24 +16,25 @@ async function handleFormSubmission() {
         gameID: gameIDEl.value,
     };
 
-    try {
-        const response = await fetch('/api/joinGame', {
-            method: 'POST',
-            headers: {'content-type': 'application/json'},
-            body: JSON.stringify(data),
-        }); 
-        
-        const returnData = await response.json();
+    const response = await fetch('/api/joinGame', {
+        method: 'POST',
+        headers: {'content-type': 'application/json'},
+        body: JSON.stringify(data),
+    }); 
+
+    const returnData = await response.json();
+
+    if(response.ok) {
+        console.log("GOOD RESPONSE");
         storeGameStateLocal(returnData, gameIDEl.value);
         window.location.href = "play.html";
-    } catch (error) {
-        alert('Server Error With Saving GameID');
-        console.error("ERROR WITH SERVER:", error);
-        localStorage.setItem("gameID", gameIDEl.value);
-        localStorage.setItem("opponentName", opponentName);
+    } else {
+        console.log("ERROR RESPONSE");
+        const modalEl = document.querySelector('#msgModal');
+        modalEl.querySelector('.modal-body').textContent = `⚠ Error: ${returnData.msg}`;
+        const msgModal = new bootstrap.Modal(modalEl, {});
+        msgModal.show();
     }
-
-    //alert(`Connected with ${opponentName} with GameID: ${gameIDEl.value}`);
 }
 
 function storeGameStateLocal(returnData, gameID) {

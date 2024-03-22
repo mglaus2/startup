@@ -100,16 +100,27 @@ secureApiRouter.post('/joinGame', async (req, res) => {
     let gameState = await DB.getGame(req.body.gameID);
     if (gameState) {
         console.log('Joining Game with GameID:', req.body.gameID);
-        res.send({ 
-            opponentName: gameState.opponentName,
-            hostBoard: gameState.hostBoard,
-            opponentBoard: gameState.opponentBoard,
-            turn: gameState.turn,
-            numShipsToPlaceHost: gameState.numShipsToPlaceHost,
-            numShipsToPlaceOpponent: gameState.numShipsToPlaceOpponent,
-            numHostLivesLeft: gameState.numHostLivesLeft,
-            numOpponentLivesLeft: gameState.numOpponentLivesLeft,
-        });
+        console.log('Hostname', gameState.hostname);
+        console.log('Username:', req.body.username);
+        const hostname = gameState.hostname;
+        const username = req.body.username;
+        // add to check for opponent after websocket since we will only be storing 1 version of the game?
+        if(hostname === username) {
+            res.send({ 
+                opponentName: gameState.opponentName,
+                hostBoard: gameState.hostBoard,
+                opponentBoard: gameState.opponentBoard,
+                turn: gameState.turn,
+                numShipsToPlaceHost: gameState.numShipsToPlaceHost,
+                numShipsToPlaceOpponent: gameState.numShipsToPlaceOpponent,
+                numHostLivesLeft: gameState.numHostLivesLeft,
+                numOpponentLivesLeft: gameState.numOpponentLivesLeft,
+            });
+        } else {
+            res.status(401).send({ msg: 'You are not host to this GameID' });
+        }
+    } else if (req.body.gameID === null) {
+        res.status(401).send({ msg: 'Invalid GameID' });
     } else {
         console.log('Creating Game with GameID:', req.body.gameID);
         gameState = await DB.createGame(req.body.username, req.body.gameID);
