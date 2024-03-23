@@ -68,8 +68,20 @@ For this deliverable I built out the structure of my application using HTML.
 [x] - done - Prerequisite: A link to your GitHub startup repository prominently displayed on your application's home page.  
 [x] - done - Prerequisite: Notes in your startup Git repository README.md file.  
 [x] - done - Prerequisite: At least 10 git commits spread consistently throughout the assignment period.  
-[x] - Create an HTTP service using Node.js and Express. Done!  
-[x] - Frontend served up using Express static middleware. Done!  
-[x] - Your frontend calls third party service endpoints. My frontend calls The Color API to generate a color scheme for the battleship board. It bases the color scheme off the Open Space Color. It is called when you press the generate contrasting color button on the current game page.  
-[x] - Your backend provides service endpoints. Service endpoints for saving and getting game status, updating and getting a users record, and getting information about the user and their opponent. Placeholders for login that stores the current user on the server.  
-[x] - Your frontend calls your service endpoints. I did this with all of my endpoints using the fetch function.  
+[x] - done - Create an HTTP service using Node.js and Express. Done!  
+[x] - done -  Frontend served up using Express static middleware. Done!  
+[x] - done - Your frontend calls third party service endpoints. My frontend calls The Color API to generate a color scheme for the battleship board. It bases the color scheme off the Open Space Color. It is called when you press the generate contrasting color button on the current game page.  
+[x] - done - Your backend provides service endpoints. Service endpoints for saving and getting game status, updating and getting a users record, and getting information about the user and their opponent. Placeholders for login that stores the current user on the server.  
+[x] - done - Your frontend calls your service endpoints. I did this with all of my endpoints using the fetch function.  
+
+## DB/Login Deliverable
+
+[x] - done - Prerequisite: Simon Login deployed to your production environment with your dbConfig.json credentials.   
+[x] - done - Prerequisite: A link to your GitHub startup repository prominently displayed on your application's home page.  
+[x] - done - Prerequisite: Notes in your startup Git repository README.md file.  
+[x] - done - Prerequisite: At least 10 git commits spread consistently throughout the assignment period.  
+[x] - done - Supports new user registration. Creates a new account in the database when create user button is pressed. Password is hashed before being stored and the user is given an authtoken.  
+[x] - done - Supports existing user authentication. User can login through username and password. If password matches the hashed password in the users table, it logs them in and gives them permission to access data related to their username.  
+[x] - done - Stores application data in MongoDB. I currently have 3 mongoDB tables in users, games, and records. Users stores login information, games stores the game states by gameID and is updated whenever a player makes a move, and records stores every record between two players.  
+[x] - done - Stores and retrieves credentials in MongoDB. Stores users credentials in users table and based on their credentials they can access data about their account. This data can be creating/resuming a game or looking at their personal leaderboard. Data is only accessible if it has coorelation to the username that is logged in.  
+[x] - done - Restricts application functionality based upon authentication. Authentication is implemented using authtokens that are generated at the creation of each account. If a user tries accessing things that are not in their jurisdiction, the server throws an "Unauthorized" error.  
