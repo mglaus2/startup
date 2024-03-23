@@ -192,6 +192,7 @@ secureApiRouter.post('/records/insert', async (req, res) => {
     console.log("Username:", req.body.username);
     console.log("Opponent Name:", req.body.opponentName);
     console.log("Winner:", req.body.winner);
+    
     const record = await DB.insertRecord(req.body.username, req.body.opponentName, req.body.winner);
 
     if (record){

@@ -134,9 +134,6 @@ async function getUsersRecords(username) {
     };
 
     let matchups = await recordCollection.find(filter).toArray();
-    if (length(matchups)) {
-        matchups = [];
-    }
 
     return matchups;
 }
