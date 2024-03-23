@@ -2,12 +2,14 @@ const { MongoClient } = require('mongodb');
 const bcrypt = require('bcrypt');
 const uuid = require('uuid');
 const config = require('./dbConfig.json');
+const { match } = require('assert');
 
 const url = `mongodb+srv://${config.userName}:${config.password}@${config.hostname}`;
 const client = new MongoClient(url);
 const db = client.db('startup');
 const userCollection = db.collection('user');
 const gameCollection = db.collection('game');
+const recordCollection = db.collection('record');
 
 // This will asynchronously test the connection and exit the process if it fails
 (async function testConnection() {
@@ -123,6 +125,91 @@ async function storeGameStatus(gameID, currGameState, username) {
     return gameState;
 }
 
+async function getUsersRecords(username) {
+    const filter = {
+        $or: [
+            { user1: username },
+            { user2: username }
+        ]
+    };
+
+    let matchups = await recordCollection.find(filter).toArray();
+    if (length(matchups)) {
+        matchups = [];
+    }
+
+    return matchups;
+}
+
+async function getMatchupRecord(username, opponentName) {
+    const filter = {
+        $or: [
+            { user1: username, user2: opponentName },
+            { user1: opponentName, user2: username }
+        ]
+    };
+    
+    const matchup = await recordCollection.findOne(filter);
+    console.log("Matchup Found:", matchup);
+    return matchup;
+}
+
+async function insertRecord(username, opponentName, winner) {
+    let matchup = await getMatchupRecord(username, opponentName);
+    let record;
+    let user1Wins;
+    let user2Wins;
+
+    if (matchup) {
+        console.log("Existing matchup update");
+        if (matchup.user1 === winner) {
+            user1Wins = matchup.user1Wins + 1;
+            record = {
+                user1Wins: user1Wins,
+            };
+        } else if (matchup.user2 === winner) {
+            user2Wins = matchup.user2Wins + 1;
+            record = {
+                user2Wins: user2Wins,
+            };
+        }
+
+        const filter = {
+            $or: [
+                { user1: username, user2: opponentName },
+                { user1: opponentName, user2: username }
+            ]
+        };
+
+        await recordCollection.updateOne(filter, { $set: record });
+    } else {
+        console.log("Creating new matchup");
+        let user1;
+        let user2;
+        if (winner === username) {
+            user1 = winner;
+            user2 = opponentName;
+        } else if (winner === opponentName) {
+            user1 = winner;
+            user2 = username;
+        }
+
+        console.log("User1:", user1);
+        console.log("User2:", user2);
+
+        record = {
+            user1: user1,
+            user2: user2,
+            user1Wins: 1,
+            user2Wins: 0,
+        };
+
+        await recordCollection.insertOne(record);
+    }
+
+    return record;
+}
+
 module.exports = {
     getUser,
     getUserByToken,
@@ -130,4 +217,6 @@ module.exports = {
     getGame,
     createGame,
     storeGameStatus,
+    getUsersRecords,
+    insertRecord,
 };

@@ -1,10 +1,4 @@
 const playerNameEl = document.getElementById('username');
-
-let numShipsToPlace = 10; // Soon to replace with numShipsToPlaceHost and Opponent
-let numHitsLeft = 10; // SOON TO REPLACE WITH numOpponentLivesLeft
-let numLivesLeft = 10; // SOON TO REPLACE WITH numHostLivesLeft
-let canGuess; // SOON TO REPLACE WITH TURN STRING
-
 const numRowsAndCols = 10;
 const finalizeBoardButton = document.getElementById('finalize-board-button');
 const generateColorButton = document.getElementById('generate-colors-button');
@@ -42,7 +36,6 @@ function createEmptyBoard() {
     return Array.from(Array(numRowsAndCols), () => new Array(numRowsAndCols).fill(0));
 }
 
-// currently stores boards in local storage with gameID, will store in database based off of gameID
 function storeBoardsLocal() {
     const playerBoardString = JSON.stringify(playerBoard);
     const opponentBoardString = JSON.stringify(opponentBoard);
@@ -84,15 +77,11 @@ async function saveGameState() {
         storeBoardsLocal();
     } else {
         console.log("STORING ERROR");
-        const returnData = await response.json();
-        const modalEl = document.querySelector('#msgModal');
-        modalEl.querySelector('.modal-body').textContent = `⚠ Error: ${returnData.msg}`;
-        const msgModal = new bootstrap.Modal(modalEl, {});
-        msgModal.show();
+        const body = await response.json();
+        displayMessage(`⚠ Error: ${body.msg}`);
     }
 }
 
-// will pull from database instead of local storage
 function retrieveBoardsLocal() {
     const playerBoardString = localStorage.getItem(`hostBoard`);
     const opponentBoardString = localStorage.getItem(`opponentBoard`);
@@ -131,13 +120,13 @@ function displayBoardLogic() {
             console.log("GAME OVER");
             displayBoard(playerBoard, 'board');
             setTimeout(() => {
-                alert("You lost this game!");
+                displayMessage("You lost this game!");
             }, 1000);
         } else if(numOpponentLivesLeft === 0) {
             console.log('YOU WON THIS GAME');
             displayBoard(opponentBoard, 'board');
             setTimeout(() => {
-                alert("You won this game!");
+                displayMessage("You won this game!");
             }, 1000);
         } 
         else {
@@ -180,11 +169,8 @@ async function loadBoards() {
         // SAVE SCORES IF WE GO OFFLINE
         storeBoardsLocal();
     } else {
-        const returnData = await response.json();
-        const modalEl = document.querySelector('#msgModal');
-        modalEl.querySelector('.modal-body').textContent = `⚠ Error: ${returnData.msg}`;
-        const msgModal = new bootstrap.Modal(modalEl, {});
-        msgModal.show();
+        const body = await response.json();
+        displayMessage(`⚠ Error: ${body.msg}`);
     }
 }
 
@@ -232,7 +218,7 @@ function handlePlayerCellClickPlacingShips(event) {
             finalizeBoardButton.disabled = true;
         }
     } else {
-        alert("Too many ships.");
+        displayMessage("Too many ships.");
     }
 }
 
@@ -246,7 +232,7 @@ function updatePlayerBoardCell(cellElement) {
     }
 }
 
-// need to include updating opponent with Web Socket TO DOOOOOOO ********
+// need to include updating opponent with Web Socket
 function handlePlayerCellClickGuess(event) {
     const position = parseInt(event.target.dataset.position);
     const row = Math.floor(position / numRowsAndCols);
@@ -254,7 +240,7 @@ function handlePlayerCellClickGuess(event) {
 
     if (turn === "Host") {
         if(opponentBoard[row][col] === 1 || opponentBoard[row][col] === 2 || opponentBoard[row][col] === 3) {
-            alert("Invalid Guess.");
+            displayMessage("Invalid Guess.");
         } else if (opponentBoard[row][col] === 4) {
             turn = "Opponent";
             opponentBoard[row][col] = 2;
@@ -265,13 +251,18 @@ function handlePlayerCellClickGuess(event) {
                 displayBoard(opponentBoard, 'board', handlePlayerCellClickGuess);
                 setTimeout(() => {
                     if (numOpponentLivesLeft === 0) {
-                        alert("YOU WON!");
-                        storeResults(true);
-                        saveGameState();
+                        displayMessage("YOU WON!");
+                        storeResults(username);
                         displayBoard(opponentBoard, 'board');
                     } else {
                         simulateOpponentGuess();
                     }
+                }, 1000);
+            } else {
+                updateCellAppearanceOpponent(event.target, opponentBoard[row][col]);
+                saveGameState();
+                setTimeout(() => {
+                    simulateOpponentGuess();
                 }, 1000);
             }
         } else {
@@ -286,50 +277,6 @@ function handlePlayerCellClickGuess(event) {
             }, 1000);
         }
     }
-
-
-    
-    /*if(canGuess) {
-        if(opponentBoard[row][col] === 1 || opponentBoard[row][col] === 2 || opponentBoard[row][col] === 3) {
-            alert("Invalid Guess.");
-        } else if(opponentBoard[row][col] === 4) {
-            canGuess = false;
-            opponentBoard[row][col] = 2;
-            --numHitsLeft;
-            let tempMatrix = createEmptyBoard();
-            console.log("CHECKING IF SUNK");
-            if(checkIfSunk(row, col, tempMatrix, true, opponentBoard)) {
-                displayBoard(opponentBoard, 'board', handlePlayerCellClickGuess);
-                setTimeout(() => {
-                    if (numHitsLeft === 0) {
-                        alert("YOU WON!");
-                        storeResults(true);
-                        saveGameState();
-                        displayBoard(opponentBoard, 'board');
-                    } else {
-                        simulateOpponentGuess();
-                    }
-                }, 1000);
-            } else {
-                updateCellAppearanceOpponent(event.target, opponentBoard[row][col]);
-                saveGameState();
-                setTimeout(() => {
-                    simulateOpponentGuess();
-                }, 1000);
-            }
-        } else {
-            canGuess = false;
-            opponentBoard[row][col] = 1;
-            updateCellAppearanceOpponent(event.target, opponentBoard[row][col]);
-
-            saveGameState();
-
-            setTimeout(() => {
-                simulateOpponentGuess();
-            }, 1000);
-        }
-
-    }*/
 }
 
 function updateCellAppearanceOpponent(cellElement, cellValue) {
@@ -385,14 +332,14 @@ function validateShips() {
 
 finalizeBoardButton.addEventListener('click', () => {
     if (validateShips()) {
-        alert("Board Finalized!");
+        displayMessage("Board Finalized!");
         playerNameEl.textContent = opponentName + '\'s Board';
         displayBoard(opponentBoard, 'board', handlePlayerCellClickGuess);
         finalizeBoardButton.parentNode.removeChild(finalizeBoardButton);
         turn = "Host";
         saveGameState();
     } else {
-        alert("Invalid ships");
+        displayMessage("Invalid ships");
     }
 });
 
@@ -464,8 +411,8 @@ function simulateOpponentGuess() {
             displayBoard(playerBoard, 'board');
             setTimeout(() => {
                 if (numHitsLeft === 0) {
-                    alert("You lost.");
-                    storeResults(false);
+                    displayMessage("You lost.");
+                    storeResults(opponentName);  // only should call this once for the winner when fully implemented
                     displayBoard(playerBoard, 'board');
                 }
             }, 1000);
@@ -501,35 +448,33 @@ function handleColorChange() {
     document.documentElement.style.setProperty('--miss-cell-color', missColor);
 }
 
-async function storeResults(didWin) {
+async function storeResults(winner) {
     console.log('Storing Results');
     const data = {
         username: username,
         opponentName: opponentName,
-        didWin: didWin,
+        winner: winner,
     };
 
-    try {
-        const response = await fetch('/api/updateRecord', {
-            method: 'POST',
-            headers: {'content-type': 'application/json'},
-            body: JSON.stringify(data),
-        });
+    const response = await fetch('/api/records/insert', {
+        method: 'POST',
+        headers: {'content-type': 'application/json'},
+        body: JSON.stringify(data),
+    });
 
-        const responseData = await response.json();
-        const message = responseData.message;
-        if(message === 'Users records updated successfully') {
-            console.log('Users records updated in server');
-        }
-        storeResultsLocal(didWin);
-    } catch {
-        storeResultsLocal(didWin);
+    if (response.ok) {
+        storeResultsLocal(winner);
+        saveGameState();
+    } else {
+        const body = await response.json();
+        displayMessage(`⚠ Error: ${body.msg}`);
     }
 }
 
 // store in database rather than local storage
-function storeResultsLocal(didWin) {
+function storeResultsLocal(winner) {
     let records = [];
+    console.log("Storing record local");
     const recordsText = localStorage.getItem('gameRecords');
     if(recordsText) {
         records = JSON.parse(recordsText);
@@ -537,19 +482,22 @@ function storeResultsLocal(didWin) {
     
     // check if there is an existing record based on username and opponentName
     const existingRecord = records.find(record => record.username === username && record.opponent === opponentName);
+    console.log("Existing record:", existingRecord);
 
     if (existingRecord) {
-        if (didWin === true) {
+        console.log("Updating record local");
+        if (username === winner) {
             existingRecord.wins++;
-        } else if (didWin === false) {
+        } else if (opponentName === winner) {
             existingRecord.losses++;
         }
     } else {
+        console.log("Creating record local");
         records.push({
             username: username,
             opponent: opponentName,
-            wins: didWin === true ? 1 : 0,
-            losses: didWin === false ? 1 : 0
+            wins: winner === username ? 1 : 0,
+            losses: winner === opponentName ? 1 : 0
         });
     }
 
@@ -606,3 +554,10 @@ generateColorButton.addEventListener('click', () => {
     console.log('PRESSED GENERATE COLOR');
     generateColors();
 });
+
+function displayMessage(message) {
+    const modalEl = document.querySelector('#msgModal');
+    modalEl.querySelector('.modal-body').textContent = `${message}`;
+    const msgModal = new bootstrap.Modal(modalEl, {});
+    msgModal.show();
+}

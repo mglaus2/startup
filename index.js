@@ -187,6 +187,30 @@ secureApiRouter.post('/game/getStatus', async (req, res) => {
     }
 });
 
+secureApiRouter.post('/records/insert', async (req, res) => {
+    console.log("Inserting record");
+    console.log("Username:", req.body.username);
+    console.log("Opponent Name:", req.body.opponentName);
+    console.log("Winner:", req.body.winner);
+    const record = await DB.insertRecord(req.body.username, req.body.opponentName, req.body.winner);
+
+    if (record){
+        res.send({ id: record.id });
+    } else {
+        res.status(401).send({ msg: 'Cannot insert record' });
+    }
+});
+
+secureApiRouter.post('/records/get', async (req, res) => {
+    console.log("Getting users records");
+    const records = await DB.getUsersRecords(req.body.username);
+    if (records) {
+        res.send({ records: records, });
+    } else {
+        res.status(401).send({ msg: 'Could not retrieve record' });
+    }
+});
+
 apiRouter.post('/gameStatus', (req, res) => {
     console.log('Getting Game Status');
     checkGameStatus(req.body);
