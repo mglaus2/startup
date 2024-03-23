@@ -14,6 +14,7 @@ async function handleFormSubmission() {
     const data = {
         username: username,
         gameID: gameIDEl.value,
+        opponentName: opponentName,
     };
 
     const response = await fetch('/api/game/join', {
@@ -37,12 +38,12 @@ async function handleFormSubmission() {
     }
 }
 
-function storeGameStateLocal(returnData, gameID) {
+function storeGameStateLocal(returnData, gameID, opponentName) {
     const hostBoardString = JSON.stringify(returnData.hostBoard);
     const opponentBoardString = JSON.stringify(returnData.opponentBoard);
 
     localStorage.setItem('gameID', gameID);
-    localStorage.setItem('opponentName', returnData.opponentName);
+    localStorage.setItem('opponentName', opponentName);
     localStorage.setItem('hostBoard', hostBoardString);
     localStorage.setItem('opponentBoard', opponentBoardString);
     localStorage.setItem('turn', returnData.turn);

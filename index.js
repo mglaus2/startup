@@ -103,11 +103,11 @@ secureApiRouter.post('/game/join', async (req, res) => {
         console.log('Hostname', gameState.hostname);
         console.log('Username:', req.body.username);
         const hostname = gameState.hostname;
+        const opponentName = gameState.opponentName;
         const username = req.body.username;
-        // add to check for opponent after websocket since we will only be storing 1 version of the game?
+        
         if(hostname === username) {
             res.send({ 
-                opponentName: gameState.opponentName,
                 hostBoard: gameState.hostBoard,
                 opponentBoard: gameState.opponentBoard,
                 turn: gameState.turn,
@@ -116,16 +116,25 @@ secureApiRouter.post('/game/join', async (req, res) => {
                 numHostLivesLeft: gameState.numHostLivesLeft,
                 numOpponentLivesLeft: gameState.numOpponentLivesLeft,
             });
+        } else if (opponentName === username) {
+            res.send({
+                hostBoard: gameState.opponentBoard,
+                opponentBoard: gameState.hostBoard,
+                turn: gameState.turn,
+                numShipsToPlaceHost: gameState.numShipsToPlaceOpponent,
+                numShipsToPlaceOpponent: gameState.numShipsToPlaceHost,
+                numHostLivesLeft: gameState.numOpponentLivesLeft,
+                numOpponentLivesLeft: gameState.numHostLivesLeft,
+            });
         } else {
-            res.status(401).send({ msg: 'You are not host to this GameID' });
+            res.status(401).send({ msg: 'You are not a player to this GameID' });
         }
     } else if (req.body.gameID === null) {
         res.status(401).send({ msg: 'Invalid GameID' });
     } else {
         console.log('Creating Game with GameID:', req.body.gameID);
-        gameState = await DB.createGame(req.body.username, req.body.gameID);
+        gameState = await DB.createGame(req.body.username, req.body.gameID, req.body.opponentName);
         res.send({ 
-            opponentName: gameState.opponentName,
             hostBoard: gameState.hostBoard,
             opponentBoard: gameState.opponentBoard,
             turn: gameState.turn,
@@ -148,13 +157,26 @@ secureApiRouter.post('/game/storeStatus', async (req, res) => {
     console.log('Hostname:', hostname);
     console.log('Opponent name:', opponentName);
 
-    console.log(gameState);
+    console.log("ALLLLLLEEEEERRRRRTTTT", gameState);
     console.log(req.body);
-    if(username === hostname || username === opponentName) {
+    if(username === hostname) {
         await DB.storeGameStatus(req.body.gameID, req.body, username);
         res.status(204).send({ msg: "Game Status Updated in DB" });
+    } else if(username === opponentName) {
+        const gameStatus = {
+            hostname: opponentName,
+            gameID: req.body.gameID,
+            hostBoard: req.body.opponentBoard,
+            opponentBoard: req.body.hostBoard,
+            turn: req.body.turn,
+            numShipsToPlaceHost: req.body.numShipsToPlaceOpponent,
+            numShipsToPlaceOpponent: req.body.numShipsToPlaceHost,
+            numHostLivesLeft: req.body.numOpponentLivesLeft,
+            numOpponentLivesLeft: req.body.numHostLivesLeft,
+        };
+        await DB.storeGameStatus(req.body.gameID, gameStatus, opponentName);
     } else {
-        res.status(401).send({ msg: 'You are not host or opponent in this game' });
+        res.status(401).send({ msg: 'You are not a player in this game' });
     }
 });
 
@@ -166,8 +188,9 @@ secureApiRouter.post('/game/getStatus', async (req, res) => {
         console.log('Hostname', gameState.hostname);
         console.log('Username:', req.body.username);
         const hostname = gameState.hostname;
+        const opponentName = gameState.opponentName;
         const username = req.body.username;
-        // add to check for opponent after websocket since we will only be storing 1 version of the game?
+        
         if(hostname === username) {
             res.send({ 
                 opponentName: gameState.opponentName,
@@ -179,8 +202,19 @@ secureApiRouter.post('/game/getStatus', async (req, res) => {
                 numHostLivesLeft: gameState.numHostLivesLeft,
                 numOpponentLivesLeft: gameState.numOpponentLivesLeft,
             });
+        } else if (opponentName === username) {
+            res.send({
+                opponentName: gameState.hostname,
+                hostBoard: gameState.opponentBoard,
+                opponentBoard: gameState.hostBoard,
+                turn: gameState.turn,
+                numShipsToPlaceHost: gameState.numShipsToPlaceOpponent,
+                numShipsToPlaceOpponent: gameState.numShipsToPlaceHost,
+                numHostLivesLeft: gameState.numOpponentLivesLeft,
+                numOpponentLivesLeft: gameState.numHostLivesLeft,
+            });
         } else {
-            res.status(401).send({ msg: 'You are not host to this GameID' });
+            res.status(401).send({ msg: 'You are not a player in this GameID' });
         }
     } else {
         res.status(401).send({ msg: 'Game Does Not Exist' });
@@ -192,7 +226,7 @@ secureApiRouter.post('/records/insert', async (req, res) => {
     console.log("Username:", req.body.username);
     console.log("Opponent Name:", req.body.opponentName);
     console.log("Winner:", req.body.winner);
-    
+
     const record = await DB.insertRecord(req.body.username, req.body.opponentName, req.body.winner);
 
     if (record){
@@ -210,102 +244,6 @@ secureApiRouter.post('/records/get', async (req, res) => {
     } else {
         res.status(401).send({ msg: 'Could not retrieve record' });
     }
-});
-
-apiRouter.post('/gameStatus', (req, res) => {
-    console.log('Getting Game Status');
-    checkGameStatus(req.body);
-
-    const data = {
-        playerBoard: playerBoard,
-        opponentBoard: opponentBoard,
-        canGuess: canGuess,
-        numShipsToPlace: numShipsToPlace,
-        numHitsLeft: numHitsLeft,
-        numLivesLeft: numLivesLeft,
-        gameID: gameID,
-        username: username,
-        opponentName: opponentName,
-    };
-
-    console.log(data);
-    res.send(data);
-});
-
-apiRouter.post('/updateGameStatus', (req, res) => {
-    console.log('Saving Game Status');
-    updateGameStatus(req.body);
-
-    res.json({ message: 'Game Status saved successfully'});
-});
-
-apiRouter.post('/saveUsername', (req, res) => {
-    console.log('Saving Username');
-    username = req.body.username;
-
-    console.log(username);
-
-    res.json({ message: 'Username saved successfully'});
-});
-
-apiRouter.post('/saveGameID', (req, res) => {
-    console.log('Saving Game ID');
-    gameID = req.body.gameID;
-    opponentName = req.body.opponentName;
-
-    console.log(gameID);
-    console.log(opponentName);
-
-    res.json({ message: 'Game ID saved successfully' });
-});
-
-apiRouter.get('/getGameInfo', (_req, res) => {
-    console.log('Getting Game Info');
-
-    data = {
-        username: username,
-        opponentName: opponentName,
-        gameID: gameID,
-    };
-
-    console.log(data);
-
-    res.send(data);
-});
-
-apiRouter.post('/getUsersRecords', (req, res) => {
-    console.log('Getting users records');
-    userRecords = getUsersRecords(req.body, records);
-
-    data = {
-        userRecords: userRecords,
-    };
-
-    console.log(data);
-
-    res.send(data);
-});
-
-apiRouter.get('/getUsername', (_req, res) => {
-    console.log('Getting Username');
-    username = getUsername();
-
-    data = {
-        username: username,
-    };
-
-    console.log(data);
-
-    res.send(data);
-});
-
-apiRouter.post('/updateRecord', (req, res) => {
-    console.log('Updating Record');
-    updateRecord(req.body, records);
-
-    console.log(records);
-
-    res.json({ message: 'Users records updated successfully' });
 });
 
 // Default error handler
@@ -330,140 +268,3 @@ function setAuthCookie(res, authToken) {
 app.listen(port, () => {
     console.log(`Listening on port ${port}`);
 });
-
-// Boards and game state information
-let numRowsAndCols = 10;
-let playerBoard = null;
-let opponentBoard = null;
-let canGuess = null;
-let numShipsToPlace = null;
-let numHitsLeft = null;
-let numLivesLeft = null;
-let username = null;
-let opponentName = null;
-let gameID = null;
-let currGameID = null;
-let currUsername = null;
-let records = [];
-
-function updateGameStatus(gameState) {
-    playerBoard = gameState.playerBoard;
-    opponentBoard = gameState.opponentBoard;
-    canGuess = gameState.canGuess;
-    numShipsToPlace = gameState.numShipsToPlace;
-    numHitsLeft = gameState.numHitsLeft;
-    numLivesLeft = gameState.numLivesLeft;
-    gameID = gameState.gameID;
-}
-
-function checkGameStatus(gameState) {
-    console.log(gameState.gameID);
-    console.log(gameState.username);
-    console.log(gameState.opponentName);
-    // this is going to check if the game is in the database 
-    // if it is in the database then loads the current state 
-    // if it is not in the database it creates an new entry
-
-    // currently since the username is being updated there is
-    // no way to simulate looking for it up in the database and
-    // it only stores one game at a time. Implementing this
-    // is more complex than just storing each game in the database
-    if(gameState.gameID !== currGameID || gameState.username !== currUsername || gameState.opponentName !== opponentName
-        || gameState.gameID === null || gameState.username === null || gameState.opponentName === null) {
-        playerBoard = Array.from(Array(numRowsAndCols), () => new Array(numRowsAndCols).fill(0));
-        opponentBoard = [
-            [0, 4, 4, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 4, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 4, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 4, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 4, 0, 0, 0, 0, 0, 0],
-            [0, 0, 4, 4, 4, 0, 0, 0, 0, 0],
-            [0, 0, 0, 4, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        ];
-        canGuess = true;
-        numShipsToPlace = 10;
-        numHitsLeft = 10;
-        numLivesLeft = 10;
-
-        if(gameState.gameID === null) {
-            console.log('updating gameID');
-            gameID = 'TEST INPUT'
-        }
-        if (gameState.username === null) {
-            username = 'Mystery Player'
-        }
-        if(gameState.opponentName === null) {
-            opponentName = 'Opponent';
-        }
-        currGameID = gameID;
-        currUsername = username;
-    } else{
-        console.log('Getting stored boards');
-    }
-}
-
-function getUsername() {
-    if (username === null) {
-        console.log('SETTING USERNAME IN GET USERNAME');
-        username = 'Mystery Player';
-    }
-
-    return username;
-}
-
-function getUsersRecords(gameInfo, records) {
-    let userRecords = [];
-
-    if (username === null) {
-        console.log('SETTING USERNAME IN GET RECORDS');
-        username = 'Mystery Player';
-    }
-
-    if (records.length) {
-        for (const [i, record] of records.entries()) {
-            if (record.username === gameInfo.username) {
-                userRecords.push(record);
-            }
-        }
-    }
-
-    return userRecords;
-}
-
-function updateRecord(gameResults, records) {
-    let gameRecord = null;
-    console.log(gameResults.username);
-    console.log(gameResults.opponentName);
-    console.log(gameResults.didWin);
-
-    if (records.length) {
-        for (const record of records) {
-            console.log('RECORD:');
-            console.log(record);
-            if (record.username === gameResults.username && record.opponentName === gameResults.opponentName) {
-                console.log('FOUND GAME RECORD');
-                gameRecord = record;
-            }
-        }
-    }
-
-    if (gameRecord === null) {
-        console.log('Creating new record');
-        records.push({
-            username: gameResults.username,
-            opponentName: gameResults.opponentName,
-            wins: gameResults.didWin === true ? 1 : 0,
-            losses: gameResults.didWin === false ? 1 : 0,
-        });
-    } else {
-        console.log('Updating record');
-        if (gameResults.didWin === true) {
-            gameRecord.wins += 1;
-        } else {
-            gameRecord.losses += 1;
-        }
-    }
-}

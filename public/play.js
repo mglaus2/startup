@@ -101,42 +101,6 @@ function retrieveBoardsLocal() {
     displayBoardLogic();
 }
 
-function displayBoardLogic() {
-    if (turn === 'Placing Ships') {
-        playerNameEl.textContent = username + '\'s Board';
-        displayBoard(playerBoard, 'board', handlePlayerCellClickPlacingShips);
-    } else if (turn === 'Host') {
-        playerNameEl.textContent = opponentName + '\'s Board';
-        finalizeBoardButton.parentNode.removeChild(finalizeBoardButton);
-        if (numHostLivesLeft === 0 || numOpponentLivesLeft=== 0) {
-            displayBoard(opponentBoard, 'board');
-        } else {
-            displayBoard(opponentBoard, 'board', handlePlayerCellClickGuess);
-        }
-    } else if(turn === 'Opponent') {
-        playerNameEl.textContent = username + '\'s Board';
-        finalizeBoardButton.parentNode.removeChild(finalizeBoardButton);
-        if(numHostLivesLeft === 0) {
-            console.log("GAME OVER");
-            displayBoard(playerBoard, 'board');
-            setTimeout(() => {
-                displayMessage("You lost this game!");
-            }, 1000);
-        } else if(numOpponentLivesLeft === 0) {
-            console.log('YOU WON THIS GAME');
-            displayBoard(opponentBoard, 'board');
-            setTimeout(() => {
-                displayMessage("You won this game!");
-            }, 1000);
-        } 
-        else {
-            setTimeout(() => {
-                simulateOpponentGuess();
-            }, 1000);
-        }
-    }
-}
-
 async function loadBoards() {
     username = localStorage.getItem('username');
     gameID = localStorage.getItem('gameID');
@@ -171,6 +135,42 @@ async function loadBoards() {
     } else {
         const body = await response.json();
         displayMessage(`⚠ Error: ${body.msg}`);
+    }
+}
+
+function displayBoardLogic() {
+    if (turn === 'Placing Ships') {
+        playerNameEl.textContent = username + '\'s Board';
+        displayBoard(playerBoard, 'board', handlePlayerCellClickPlacingShips);
+    } else if (turn === 'Host') {
+        playerNameEl.textContent = opponentName + '\'s Board';
+        finalizeBoardButton.parentNode.removeChild(finalizeBoardButton);
+        if (numHostLivesLeft === 0 || numOpponentLivesLeft=== 0) {
+            displayBoard(opponentBoard, 'board');
+        } else {
+            displayBoard(opponentBoard, 'board', handlePlayerCellClickGuess);
+        }
+    } else if(turn === 'Opponent') {
+        playerNameEl.textContent = username + '\'s Board';
+        finalizeBoardButton.parentNode.removeChild(finalizeBoardButton);
+        if(numHostLivesLeft === 0) {
+            console.log("GAME OVER");
+            displayBoard(playerBoard, 'board');
+            setTimeout(() => {
+                displayMessage("You lost this game!");
+            }, 1000);
+        } else if(numOpponentLivesLeft === 0) {
+            console.log('YOU WON THIS GAME');
+            displayBoard(opponentBoard, 'board');
+            setTimeout(() => {
+                displayMessage("You won this game!");
+            }, 1000);
+        } 
+        else {
+            setTimeout(() => {
+                simulateOpponentGuess();
+            }, 1000);
+        }
     }
 }
 

@@ -46,7 +46,7 @@ async function getGame(gameID) {
     return gameCollection.findOne({ gameID: gameID });
 }
 
-async function createGame(username, gameID) {
+async function createGame(username, gameID, opponentName) {
     let hostBoard = Array.from(Array(10), () => new Array(10).fill(0));
     let opponentBoard = [
         [0, 4, 4, 0, 0, 0, 0, 0, 0, 0],
@@ -65,7 +65,6 @@ async function createGame(username, gameID) {
     let numShipsToPlaceOpponent = 0;
     let numHostLivesLeft = 10;
     let numOpponentLivesLeft = 10;
-    let opponentName = 'Computer';
 
     const gameState = {
         gameID: gameID,
@@ -93,6 +92,9 @@ async function storeGameStatus(gameID, currGameState, username) {
     let gameState;
     const hostname = currGameState.hostname;
     const opponentName = currGameState.opponentName;
+    console.log("hostname:", hostname);
+    console.log("opponent name:", opponentName);
+    console.log("username:", username);
 
     if (username === hostname) {
         console.log('Username matched with hostname');
