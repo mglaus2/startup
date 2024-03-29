@@ -49,20 +49,20 @@ async function getGame(gameID) {
 async function createGame(username, gameID) {
     let hostBoard = Array.from(Array(10), () => new Array(10).fill(0));
     let opponentBoard = [
-        [0, 4, 4, 0, 0, 0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 4, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 4, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 4, 0, 0, 0],
         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 4, 0, 0, 0, 0, 0, 0],
-        [0, 0, 4, 4, 4, 0, 0, 0, 0, 0],
-        [0, 0, 0, 4, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     ];
     let turn = "Placing Ships";
     let numShipsToPlaceHost = 10;
-    let numShipsToPlaceOpponent = 0;
+    let numShipsToPlaceOpponent = 10;
     let numHostLivesLeft = 10;
     let numOpponentLivesLeft = 10;
 

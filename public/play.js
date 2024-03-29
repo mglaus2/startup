@@ -23,18 +23,9 @@ let numOpponentLivesLeft;
 let socket;
 let connectionEstablished = false;
 
-(async () => {
-    if (connectionEstablished === true) {
-        setDisplay('createGame', 'none');
-        setDisplay('playGame', 'block');
-    } else {
-        setDisplay('createGame', 'block');
-        setDisplay('playGame', 'none');
-    }
-});
-
 async function init() {
-    //configureWebSocket();
+    setDisplay('createGame', 'block');
+    setDisplay('playGame', 'none');
 }
 
 init();
