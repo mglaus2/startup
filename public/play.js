@@ -6,6 +6,8 @@ const generateColorButton = document.getElementById('generate-colors-button');
 const EstablishConnectionEvent = "establishingConnection";
 const ConnectionEstablishedEvent = "connectionEstablished";
 const ErrorHappenedEvent = "error";
+const BoardFinalizedEvent = "boardFinalized";
+const StartGameEvent = "startGame";
 const MoveFinishedEvent = "moveFinished";
 const GameEndEvent = "gameEnd";
 
@@ -21,7 +23,10 @@ let numHostLivesLeft;
 let numOpponentLivesLeft;
 
 let socket;
+let isHost;
+let connectionMessage;
 let connectionEstablished = false;
+let opponentBoardFinished = false;
 
 async function init() {
     setDisplay('createGame', 'block');
@@ -58,9 +63,6 @@ async function handleFormSubmission() {
 
     gameID = gameIDEl.value;
 
-    // This is where the websocket would set up the connection and get opponents name
-    let opponentName;
-
     const data = {
         username: username,
         gameID: gameIDEl.value,
@@ -76,6 +78,7 @@ async function handleFormSubmission() {
 
     if(response.ok) {
         console.log("GOOD RESPONSE");
+        isHost = returnData.isHost;
         storeGameStateLocal(returnData, gameIDEl.value);
         configureWebSocket();
     } else {
@@ -164,7 +167,7 @@ function retrieveBoardsLocal() {
     numHostLivesLeft = parseInt(localStorage.getItem(`numHostLivesLeft`));
     numOpponentLivesLeft = parseInt(localStorage.getItem(`numOpponentLivesLeft`));
 
-    displayBoardLogic();
+    displayBoardLogic(true);
 }
 
 async function loadBoards() {
@@ -196,7 +199,23 @@ async function loadBoards() {
         numHostLivesLeft = returnData.numHostLivesLeft;
         numOpponentLivesLeft = returnData.numOpponentLivesLeft;
 
-        displayBoardLogic();
+        let isTurn;
+        if (opponentName === username) {
+            if (turn === "Host") {
+                // opponents turn
+                isTurn = false;
+            } else {
+                isTurn = true;
+            }
+        } else {
+            if (turn === "Host") {
+                isTurn = true;
+            } else {
+                isTurn = false;
+            }
+        }
+
+        displayBoardLogic(isTurn);
         console.log('Retrieved Boards from Server');
 
         // SAVE SCORES IF WE GO OFFLINE
@@ -207,11 +226,11 @@ async function loadBoards() {
     }
 }
 
-function displayBoardLogic() {
+function displayBoardLogic(currTurn) {
     if (turn === 'Placing Ships') {
         playerNameEl.textContent = username + '\'s Board';
         displayBoard(playerBoard, 'board', handlePlayerCellClickPlacingShips);
-    } else if (turn === 'Host') {
+    } else if (currTurn) {
         playerNameEl.textContent = opponentName + '\'s Board';
         finalizeBoardButton.parentNode.removeChild(finalizeBoardButton);
         if (numHostLivesLeft === 0 || numOpponentLivesLeft=== 0) {
@@ -219,7 +238,7 @@ function displayBoardLogic() {
         } else {
             displayBoard(opponentBoard, 'board', handlePlayerCellClickGuess);
         }
-    } else if(turn === 'Opponent') {
+    } else if(!currTurn) {
         playerNameEl.textContent = username + '\'s Board';
         finalizeBoardButton.parentNode.removeChild(finalizeBoardButton);
         if(numHostLivesLeft === 0) {
@@ -236,9 +255,7 @@ function displayBoardLogic() {
             }, 1000);
         } 
         else {
-            setTimeout(() => {
-                simulateOpponentGuess();
-            }, 1000);
+            displayBoard(playerBoard, 'board');
         }
     }
 }
@@ -407,6 +424,7 @@ finalizeBoardButton.addEventListener('click', () => {
         finalizeBoardButton.parentNode.removeChild(finalizeBoardButton);
         turn = "Host";
         saveGameState();
+        boardFinalized();
     } else {
         displayMessage("Invalid ships");
     }
@@ -636,6 +654,8 @@ function displayConnectionMessage(message) {
     modalEl.querySelector('.modal-body').textContent = `${message}`;
     const msgModal = new bootstrap.Modal(modalEl, {});
     msgModal.show();
+
+    return msgModal;
 }
 
 function configureWebSocket() {
@@ -652,15 +672,48 @@ function configureWebSocket() {
         const msg = JSON.parse(await event.data);
         console.log(msg.message);
         if (msg.type === EstablishConnectionEvent || msg.type === ErrorHappenedEvent) {
-            displayConnectionMessage(msg.content);
-            //loadBoards();
+            connectionMessage = displayConnectionMessage(msg.content);
         } else if (msg.type === ConnectionEstablishedEvent) {
             console.log("2 players connected");
             connectionEstablished = true;
+            if (connectionMessage) {
+                connectionMessage.hide();
+            }
             await loadBoards();
             displayMessage(msg.content);
+        } else if (msg.type === BoardFinalizedEvent) {
+            opponentBoardFinished = true;
+        } else if (msg.type === StartGameEvent) {
+            // implement where to start game
+            if (isHost) {
+                // your turn and send response everytime it says simulate opponent guess
+                displayMessage("It is your turn! Make a guess!");
+                displayBoardLogic(true);
+            } else {
+                // wait for your turn by waiting for message and not letting user touch board
+                displayMessage("Opponents Turn. Wait for them to finish.");
+                displayBoardLogic(false);
+            }
+        } else if (msg.type === MoveFinishedEvent) {
+
         }
     }
+}
+
+function boardFinalized() {
+    let event;
+
+    if (opponentBoardFinished) {
+        event = {
+            type: StartGameEvent,
+        };
+    } else {
+        event = {
+            type: BoardFinalizedEvent,
+        };
+    }
+
+    socket.send(JSON.stringify(event));
 }
 
 function setDisplay(controlId, display) {

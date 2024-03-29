@@ -41,6 +41,21 @@ function peerProxy(httpServer) {
                 type: 'connectionEstablished', 
                 content: `Connected with opponent!`,
             }));
+
+            for (const connId in connections[gameID]) {
+                // Retrieve the connection object
+                const conn = connections[gameID][connId];
+                // Check if it's not the same connection that was just added
+                if (conn.id !== connection.id) {
+                    // Send the message to this connection
+                    conn.ws.send(JSON.stringify({ 
+                        type: 'connectionEstablished', 
+                        content: `Connected with opponent!`,
+                    }));
+                    // No need to continue iterating since we've sent the message to the first connection
+                    break;
+                }
+            }
         } else {
             // Error, 2 players already connected: Send error message
             console.log("2 players are already connected");
@@ -52,6 +67,18 @@ function peerProxy(httpServer) {
 
             return;
         }
+
+        ws.on('message', function message(data) {
+            console.log("Message on WebSocket");
+            if (gameID in connections) {
+                let array = connections[gameID];
+                for (const conn in array) {
+                    if (conn.id !== connection.id) {
+                        conn.ws.send(data);
+                    }
+                }
+            }
+        });
 
         ws.on('close', () => {
             console.log('CLOSING CONNECTION');

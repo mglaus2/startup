@@ -116,6 +116,7 @@ secureApiRouter.post('/game/join', async (req, res) => {
                 numShipsToPlaceOpponent: gameState.numShipsToPlaceOpponent,
                 numHostLivesLeft: gameState.numHostLivesLeft,
                 numOpponentLivesLeft: gameState.numOpponentLivesLeft,
+                isHost: true,
             });
         } else if (opponentName === username) {
             res.send({
@@ -126,6 +127,7 @@ secureApiRouter.post('/game/join', async (req, res) => {
                 numShipsToPlaceOpponent: gameState.numShipsToPlaceHost,
                 numHostLivesLeft: gameState.numOpponentLivesLeft,
                 numOpponentLivesLeft: gameState.numHostLivesLeft,
+                isHost: false,
             });
         } else if (opponentName === null) {
             await DB.updateOpponentName(req.body.gameID, username);
@@ -137,6 +139,7 @@ secureApiRouter.post('/game/join', async (req, res) => {
                 numShipsToPlaceOpponent: gameState.numShipsToPlaceHost,
                 numHostLivesLeft: gameState.numOpponentLivesLeft,
                 numOpponentLivesLeft: gameState.numHostLivesLeft,
+                isHost: false,
             });
         } else {
             res.status(401).send({ msg: 'You are not a player to this GameID' });
@@ -154,6 +157,7 @@ secureApiRouter.post('/game/join', async (req, res) => {
             numShipsToPlaceOpponent: gameState.numShipsToPlaceOpponent,
             numHostLivesLeft: gameState.numHostLivesLeft,
             numOpponentLivesLeft: gameState.numOpponentLivesLeft,
+            isHost: true,
         });
     }
 });
