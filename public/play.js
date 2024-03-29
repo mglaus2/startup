@@ -14,8 +14,11 @@ let numShipsToPlaceOpponent;
 let numHostLivesLeft;
 let numOpponentLivesLeft;
 
+let socket;
+
 async function init() {
     await loadBoards();
+    configureWebSocket();
 }
 
 init();
@@ -560,4 +563,9 @@ function displayMessage(message) {
     modalEl.querySelector('.modal-body').textContent = `${message}`;
     const msgModal = new bootstrap.Modal(modalEl, {});
     msgModal.show();
+}
+
+function configureWebSocket() {
+    const protocol = window.location.protocol === 'http:' ? 'ws' : 'wss';
+    socket = new WebSocket(`${protocol}://${window.location.host}/ws/${gameID}`);
 }
