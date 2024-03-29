@@ -242,7 +242,10 @@ function displayBoardLogic(currTurn, fromServer) {
         //finalizeBoardButton.parentNode.removeChild(finalizeBoardButton);
         if (numHostLivesLeft === 0 || numOpponentLivesLeft === 0) {
             console.log("GAME FINISHED");
-            displayBoard(opponentBoard, 'board');
+            displayBoard(playerBoard, 'board');
+            setTimeout(() => {
+                message = displayMessage("You lost this game!");
+            }, 1000);
         } else {
             console.log("Can Guess");
             if (!firstTurn && !fromServer) {
@@ -366,6 +369,7 @@ function handlePlayerCellClickGuess(event) {
                     message = displayMessage("YOU WON!");
                     storeResults(username);
                     displayBoard(opponentBoard, 'board');
+                    sendMoveFinishedEvent();
                 } else {
                     saveGameState();
                     sendMoveFinishedEvent();
@@ -456,8 +460,6 @@ finalizeBoardButton.addEventListener('click', () => {
             displayBoard(playerBoard, 'board');
         }
 
-        playerNameEl.textContent = opponentName + '\'s Board';
-        //displayBoard(playerBoard, 'board');
         finalizeBoardButton.parentNode.removeChild(finalizeBoardButton);
         saveGameState();
         boardFinalized();
@@ -544,10 +546,11 @@ function simulateOpponentGuess() {
         if(checkIfSunk(row, col, tempMatrix, true, playerBoard)) {
             displayBoard(playerBoard, 'board');
             setTimeout(() => {
-                if (numHitsLeft === 0) {
+                if (numHostLivesLeft === 0) {
                     message = displayMessage("You lost.");
-                    storeResults(opponentName);  // only should call this once for the winner when fully implemented
+                    ///storeResults(opponentName);  // only should call this once for the winner when fully implemented
                     displayBoard(playerBoard, 'board');
+                    sendMoveFinishedEvent();
                 }
             }, 1000);
         } else {
@@ -689,13 +692,26 @@ generateColorButton.addEventListener('click', () => {
     generateColors();
 });
 
-function displayMessage(message) {
-    const modalEl = document.querySelector('#msgModal');
-    modalEl.querySelector('.modal-body').textContent = `${message}`;
-    const msgModal = new bootstrap.Modal(modalEl, {});
-    msgModal.show();
+function displayMessage(newMessage) {
+    if (message) {
+        message.hide();
+        
+        setTimeout(() => {
+            const modalEl = document.querySelector('#msgModal');
+            modalEl.querySelector('.modal-body').textContent = `${newMessage}`;
+            const msgModal = new bootstrap.Modal(modalEl, {});
+            msgModal.show();
 
-    return msgModal;
+            return msgModal;
+        }, 1000);
+    } else {
+        const modalEl = document.querySelector('#msgModal');
+        modalEl.querySelector('.modal-body').textContent = `${newMessage}`;
+        const msgModal = new bootstrap.Modal(modalEl, {});
+        msgModal.show();
+
+        return msgModal;
+    }
 }
 
 function displayConnectionMessage(message) {
@@ -766,7 +782,7 @@ function configureWebSocket() {
                 setTimeout(() => {
                     displayBoard(playerBoard, 'board');
                     displayBoardLogic(true, false);
-                }, 3000); 
+                }, 2500); 
             }, 2000);
         }
     }
@@ -796,7 +812,9 @@ function sendMoveFinishedEvent() {
     };
 
     socket.send(JSON.stringify(event));
-    displayBoardLogic(false, false);
+    if (numHostLivesLeft !== 0 && numOpponentLivesLeft !== 0) {
+        displayBoardLogic(false, false);
+    }
 }
 
 function setDisplay(controlId, display) {
