@@ -350,7 +350,11 @@ function handlePlayerCellClickGuess(event) {
     if(opponentBoard[row][col] === 1 || opponentBoard[row][col] === 2 || opponentBoard[row][col] === 3) {
         message = displayMessage("Invalid Guess.");
     } else if (opponentBoard[row][col] === 4) {
-        turn = "Opponent";
+        if (isHost) {
+            turn = "Opponent";
+        } else {
+            turn = "Host";
+        }
         opponentBoard[row][col] = 2;
         --numOpponentLivesLeft;
         let tempMatrix = createEmptyBoard();
@@ -375,7 +379,11 @@ function handlePlayerCellClickGuess(event) {
             }, 1000);
         }
     } else {
-        turn = "Opponent";
+        if (isHost) {
+            turn = "Opponent";
+        } else {
+            turn = "Host";
+        }
         opponentBoard[row][col] = 1;
         updateCellAppearanceOpponent(event.target, opponentBoard[row][col]);
 
@@ -754,7 +762,7 @@ function configureWebSocket() {
                 await loadBoards();
                 console.log("After loading boards", opponentBoard);
                 displayBoard(playerBoard, 'board');
-                
+
                 setTimeout(() => {
                     displayBoard(playerBoard, 'board');
                     displayBoardLogic(true, false);
