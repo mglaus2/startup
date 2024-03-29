@@ -101,10 +101,6 @@ function peerProxy(httpServer) {
                 if (index !== -1) {
                     connections[gameID].splice(index, 1); // Remove the connection from the array
                     console.log(connections[gameID]);
-                    if (connections[gameID].length === 0) {
-                        console.log("Removing map key value");
-                        delete connections[gameID];
-                    }
                 }
             }
         });

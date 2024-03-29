@@ -25,7 +25,7 @@ let numOpponentLivesLeft;
 let socket;
 let isHost;
 let connectionMessage;
-let message;
+let message = null;
 let firstTurn = true;
 let connectionEstablished = false;
 let opponentBoardFinished = false;
@@ -201,6 +201,10 @@ async function loadBoards() {
         numHostLivesLeft = returnData.numHostLivesLeft;
         numOpponentLivesLeft = returnData.numOpponentLivesLeft;
 
+        if (numShipsToPlaceOpponent === 0) {
+            opponentBoardFinished = true;
+        }
+
         let isTurn;
         if (isHost) {
             if (turn === "Host") {
@@ -249,7 +253,12 @@ function displayBoardLogic(currTurn, fromServer) {
         } else {
             console.log("Can Guess");
             if (!firstTurn && !fromServer) {
+                console.log("Not first and not from server");
                 message = displayMessage("It is your turn! Make a guess!");
+            } else if (firstTurn && opponentBoardFinished) {
+                console.log("first and opponents board is finished");
+                message = displayMessage("It is your turn! Make a guess!");
+                firstTurn = false;
             } else {
                 firstTurn = false;
             }
@@ -276,7 +285,12 @@ function displayBoardLogic(currTurn, fromServer) {
         else {
             console.log("Displaying own board");
             if (!firstTurn && !fromServer) {
+                console.log("Not first and not from server");
                 message = displayMessage("Opponents Turn. Wait for them to finish.");
+            } else if (firstTurn && opponentBoardFinished) {
+                console.log("first and opponents board is finished");
+                message = displayMessage("Opponents Turn. Wait for them to finish.");
+                firstTurn = false;
             } else {
                 firstTurn = false;
             }
@@ -472,8 +486,10 @@ function displayStartGameMessage() {
     turn = "Host";
     if (isHost) {
         message = displayMessage("Board Finalized! It is your turn! Make a guess!");
+        firstTurn = false;
         displayBoardLogic(true, true);
     } else {
+        firstTurn = false;
         message = displayMessage("Board Finalized! Opponents Turn. Wait for them to finish.");
         displayBoardLogic(false, true);
     }
@@ -766,11 +782,11 @@ function configureWebSocket() {
 
             if (isHost) {
                 // your turn and send response everytime it says simulate opponent guess
-                message = displayMessage("It is your turn! Make a guess!");
+                message = displayMessage("It is your turn to start the game! Make a guess!");
                 displayBoardLogic(true, false);
             } else {
                 // wait for your turn by waiting for message and not letting user touch board
-                message = displayMessage("Opponents Turn. Wait for them to finish.");
+                message = displayMessage("Opponents Turn to start the game. Wait for them to finish.");
                 displayBoardLogic(false, false);
             }
         } else if (msg.type === MoveFinishedEvent) {
