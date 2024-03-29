@@ -59,7 +59,7 @@ async function loginOrCreate(endpoint) {
 }
 
 async function goToGameHub() {
-    window.location.href = 'game-hub.html';
+    window.location.href = 'play.html';
 }
 
 async function logout() {

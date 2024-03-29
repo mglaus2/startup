@@ -73,7 +73,6 @@ async function handleFormSubmission() {
     const data = {
         username: username,
         gameID: gameIDEl.value,
-        opponentName: opponentName,
     };
 
     const response = await fetch('/api/game/join', {

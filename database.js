@@ -46,7 +46,7 @@ async function getGame(gameID) {
     return gameCollection.findOne({ gameID: gameID });
 }
 
-async function createGame(username, gameID, opponentName) {
+async function createGame(username, gameID) {
     let hostBoard = Array.from(Array(10), () => new Array(10).fill(0));
     let opponentBoard = [
         [0, 4, 4, 0, 0, 0, 0, 0, 0, 0],
@@ -69,7 +69,7 @@ async function createGame(username, gameID, opponentName) {
     const gameState = {
         gameID: gameID,
         hostname: username,
-        opponentName: opponentName,
+        opponentName: null,
         hostBoard: hostBoard,
         opponentBoard: opponentBoard,
         turn: turn,
@@ -82,6 +82,19 @@ async function createGame(username, gameID, opponentName) {
     await gameCollection.insertOne(gameState);
 
     return gameState;
+}
+
+async function updateOpponentName(gameID, opponentName) {
+    console.log("Updating opponent name");
+
+    const filter = { gameID : gameID };
+
+    const opponent = {
+        opponentName: opponentName,
+    };
+
+
+    await gameCollection.updateOne(filter, { $set: opponent });
 }
 
 async function storeGameStatus(gameID, currGameState, username) {
@@ -218,4 +231,5 @@ module.exports = {
     storeGameStatus,
     getUsersRecords,
     insertRecord,
+    updateOpponentName,
 };

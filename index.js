@@ -127,6 +127,17 @@ secureApiRouter.post('/game/join', async (req, res) => {
                 numHostLivesLeft: gameState.numOpponentLivesLeft,
                 numOpponentLivesLeft: gameState.numHostLivesLeft,
             });
+        } else if (opponentName === null) {
+            await DB.updateOpponentName(req.body.gameID, username);
+            res.send({
+                hostBoard: gameState.opponentBoard,
+                opponentBoard: gameState.hostBoard,
+                turn: gameState.turn,
+                numShipsToPlaceHost: gameState.numShipsToPlaceOpponent,
+                numShipsToPlaceOpponent: gameState.numShipsToPlaceHost,
+                numHostLivesLeft: gameState.numOpponentLivesLeft,
+                numOpponentLivesLeft: gameState.numHostLivesLeft,
+            });
         } else {
             res.status(401).send({ msg: 'You are not a player to this GameID' });
         }
@@ -134,7 +145,7 @@ secureApiRouter.post('/game/join', async (req, res) => {
         res.status(401).send({ msg: 'Invalid GameID' });
     } else {
         console.log('Creating Game with GameID:', req.body.gameID);
-        gameState = await DB.createGame(req.body.username, req.body.gameID, req.body.opponentName);
+        gameState = await DB.createGame(req.body.username, req.body.gameID);
         res.send({ 
             hostBoard: gameState.hostBoard,
             opponentBoard: gameState.opponentBoard,
