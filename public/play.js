@@ -25,6 +25,7 @@ let numOpponentLivesLeft;
 let socket;
 let isHost;
 let connectionMessage;
+let message;
 let connectionEstablished = false;
 let opponentBoardFinished = false;
 
@@ -147,7 +148,7 @@ async function saveGameState() {
     } else {
         console.log("STORING ERROR");
         const body = await response.json();
-        displayMessage(`⚠ Error: ${body.msg}`);
+        message = displayMessage(`⚠ Error: ${body.msg}`);
     }
 }
 
@@ -222,7 +223,7 @@ async function loadBoards() {
         storeBoardsLocal();
     } else {
         const body = await response.json();
-        displayMessage(`⚠ Error: ${body.msg}`);
+        message = displayMessage(`⚠ Error: ${body.msg}`);
     }
 }
 
@@ -232,7 +233,7 @@ function displayBoardLogic(currTurn) {
         displayBoard(playerBoard, 'board', handlePlayerCellClickPlacingShips);
     } else if (currTurn) {
         playerNameEl.textContent = opponentName + '\'s Board';
-        finalizeBoardButton.parentNode.removeChild(finalizeBoardButton);
+        //finalizeBoardButton.parentNode.removeChild(finalizeBoardButton);
         if (numHostLivesLeft === 0 || numOpponentLivesLeft=== 0) {
             displayBoard(opponentBoard, 'board');
         } else {
@@ -240,21 +241,22 @@ function displayBoardLogic(currTurn) {
         }
     } else if(!currTurn) {
         playerNameEl.textContent = username + '\'s Board';
-        finalizeBoardButton.parentNode.removeChild(finalizeBoardButton);
+        //finalizeBoardButton.parentNode.removeChild(finalizeBoardButton);
         if(numHostLivesLeft === 0) {
             console.log("GAME OVER");
             displayBoard(playerBoard, 'board');
             setTimeout(() => {
-                displayMessage("You lost this game!");
+                message = displayMessage("You lost this game!");
             }, 1000);
         } else if(numOpponentLivesLeft === 0) {
             console.log('YOU WON THIS GAME');
             displayBoard(opponentBoard, 'board');
             setTimeout(() => {
-                displayMessage("You won this game!");
+                message = displayMessage("You won this game!");
             }, 1000);
         } 
         else {
+            console.log("Displaying own board");
             displayBoard(playerBoard, 'board');
         }
     }
@@ -304,7 +306,7 @@ function handlePlayerCellClickPlacingShips(event) {
             finalizeBoardButton.disabled = true;
         }
     } else {
-        displayMessage("Too many ships.");
+        message = displayMessage("Too many ships.");
     }
 }
 
@@ -326,7 +328,7 @@ function handlePlayerCellClickGuess(event) {
 
     if (turn === "Host") {
         if(opponentBoard[row][col] === 1 || opponentBoard[row][col] === 2 || opponentBoard[row][col] === 3) {
-            displayMessage("Invalid Guess.");
+            message = displayMessage("Invalid Guess.");
         } else if (opponentBoard[row][col] === 4) {
             turn = "Opponent";
             opponentBoard[row][col] = 2;
@@ -337,7 +339,7 @@ function handlePlayerCellClickGuess(event) {
                 displayBoard(opponentBoard, 'board', handlePlayerCellClickGuess);
                 setTimeout(() => {
                     if (numOpponentLivesLeft === 0) {
-                        displayMessage("YOU WON!");
+                        message = displayMessage("YOU WON!");
                         storeResults(username);
                         displayBoard(opponentBoard, 'board');
                     } else {
@@ -418,17 +420,32 @@ function validateShips() {
 
 finalizeBoardButton.addEventListener('click', () => {
     if (validateShips()) {
-        displayMessage("Board Finalized!");
+        if (opponentBoardFinished) {
+            displayStartGameMessage();
+        } else {
+            message = displayMessage("Board finalized! Waiting for opponent to finalize board.");
+            turn = "Placing Ships";
+            displayBoard(playerBoard, 'board');
+        }
+
         playerNameEl.textContent = opponentName + '\'s Board';
-        displayBoard(opponentBoard, 'board', handlePlayerCellClickGuess);
+        displayBoard(playerBoard, 'board');
         finalizeBoardButton.parentNode.removeChild(finalizeBoardButton);
-        turn = "Host";
         saveGameState();
         boardFinalized();
     } else {
-        displayMessage("Invalid ships");
+        message = displayMessage("Invalid ships");
     }
 });
+
+function displayStartGameMessage() {
+    turn = "Host";
+    if (isHost) {
+        message = displayMessage("Board Finalized! It is your turn! Make a guess!");
+    } else {
+        message = displayMessage("Board Finalized! Opponents Turn. Wait for them to finish.")
+    }
+}
 
 function checkIfSunk(row, col, tempMatrix, firstIteration, board) {
     console.log(`Checking cell (${row}, ${col})`);
@@ -498,7 +515,7 @@ function simulateOpponentGuess() {
             displayBoard(playerBoard, 'board');
             setTimeout(() => {
                 if (numHitsLeft === 0) {
-                    displayMessage("You lost.");
+                    message = displayMessage("You lost.");
                     storeResults(opponentName);  // only should call this once for the winner when fully implemented
                     displayBoard(playerBoard, 'board');
                 }
@@ -554,7 +571,7 @@ async function storeResults(winner) {
         saveGameState();
     } else {
         const body = await response.json();
-        displayMessage(`⚠ Error: ${body.msg}`);
+        message = displayMessage(`⚠ Error: ${body.msg}`);
     }
 }
 
@@ -647,6 +664,8 @@ function displayMessage(message) {
     modalEl.querySelector('.modal-body').textContent = `${message}`;
     const msgModal = new bootstrap.Modal(modalEl, {});
     msgModal.show();
+
+    return msgModal;
 }
 
 function displayConnectionMessage(message) {
@@ -680,18 +699,22 @@ function configureWebSocket() {
                 connectionMessage.hide();
             }
             await loadBoards();
-            displayMessage(msg.content);
+            message = displayMessage(msg.content);
         } else if (msg.type === BoardFinalizedEvent) {
             opponentBoardFinished = true;
         } else if (msg.type === StartGameEvent) {
             // implement where to start game
+            if(message) {
+                message.hide();
+            }
+
             if (isHost) {
                 // your turn and send response everytime it says simulate opponent guess
-                displayMessage("It is your turn! Make a guess!");
+                message = displayMessage("It is your turn! Make a guess!");
                 displayBoardLogic(true);
             } else {
                 // wait for your turn by waiting for message and not letting user touch board
-                displayMessage("Opponents Turn. Wait for them to finish.");
+                message = displayMessage("Opponents Turn. Wait for them to finish.");
                 displayBoardLogic(false);
             }
         } else if (msg.type === MoveFinishedEvent) {
@@ -704,10 +727,12 @@ function boardFinalized() {
     let event;
 
     if (opponentBoardFinished) {
+        console.log("Sending game start event");
         event = {
             type: StartGameEvent,
         };
     } else {
+        console.log("Sending board finished event");
         event = {
             type: BoardFinalizedEvent,
         };

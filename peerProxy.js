@@ -69,12 +69,26 @@ function peerProxy(httpServer) {
         }
 
         ws.on('message', function message(data) {
-            console.log("Message on WebSocket");
-            if (gameID in connections) {
-                let array = connections[gameID];
-                for (const conn in array) {
+            console.log("Message on WebSocket", data);
+            if (connections[gameID] && connection) {
+                for (const connId in connections[gameID]) {
+                    // Retrieve the connection object
+                    const conn = connections[gameID][connId];
+                    // Check if it's not the same connection that was just added
                     if (conn.id !== connection.id) {
-                        conn.ws.send(data);
+                        console.log("SENDING MESSAGE")
+                        // Send the message to this connection
+                        if (Buffer.isBuffer(data)) {
+                            // Convert the Buffer to a string
+                            const messageString = data.toString('utf8');
+                            // Send the stringified data to this connection
+                            conn.ws.send(messageString);
+                        } else {
+                            // If it's not a Buffer, assume it's already a string and send it directly
+                            conn.ws.send(data);
+                        }
+                        // No need to continue iterating since we've sent the message to the first connection
+                        break;
                     }
                 }
             }

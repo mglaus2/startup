@@ -169,6 +169,7 @@ secureApiRouter.post('/game/storeStatus', async (req, res) => {
     const hostname = gameState.hostname;
     const opponentName = gameState.opponentName;
     const username = req.body.hostname;
+    let gameStatus;
     //console.log('Username:', username);
     //console.log('Hostname:', hostname);
     //console.log('Opponent name:', opponentName);
@@ -176,21 +177,55 @@ secureApiRouter.post('/game/storeStatus', async (req, res) => {
     //console.log("ALLLLLLEEEEERRRRRTTTT", gameState);
     //console.log(req.body);
     if(username === hostname) {
-        await DB.storeGameStatus(req.body.gameID, req.body, username);
+        if (req.body.numShipsToPlaceOpponent === 10) {
+            console.log("ONLY UPDATING HOSTS BOARD");
+            gameStatus = {
+                hostBoard: req.body.hostBoard,
+                turn: req.body.turn,
+                numShipsToPlaceHost: req.body.numShipsToPlaceHost,
+                numShipsToPlaceOpponent: req.body.numShipsToPlaceOpponent,
+                numHostLivesLeft: req.body.numHostLivesLeft,
+                numOpponentLivesLeft: req.body.numOpponentLivesLeft,
+            };
+        } else {
+            console.log("UPDATING BOTH BOARDS FROM HOST");
+            gameStatus = {
+                hostBoard: req.body.hostBoard,
+                opponentBoard: req.body.opponentBoard,
+                turn: req.body.turn,
+                numShipsToPlaceHost: req.body.numShipsToPlaceHost,
+                numShipsToPlaceOpponent: req.body.numShipsToPlaceOpponent,
+                numHostLivesLeft: req.body.numHostLivesLeft,
+                numOpponentLivesLeft: req.body.numOpponentLivesLeft,
+            };
+        }
+        await DB.storeGameStatus(req.body.gameID, gameStatus, username);
         res.status(204).send({ msg: "Game Status Updated in DB" });
     } else if(username === opponentName) {
-        const gameStatus = {
-            hostname: opponentName,
-            gameID: req.body.gameID,
-            hostBoard: req.body.opponentBoard,
-            opponentBoard: req.body.hostBoard,
-            turn: req.body.turn,
-            numShipsToPlaceHost: req.body.numShipsToPlaceOpponent,
-            numShipsToPlaceOpponent: req.body.numShipsToPlaceHost,
-            numHostLivesLeft: req.body.numOpponentLivesLeft,
-            numOpponentLivesLeft: req.body.numHostLivesLeft,
-        };
+        if (req.body.numShipsToPlaceOpponent === 10) {
+            console.log("ONLY UPDATING OPPONENTS BOARD");
+            gameStatus = {
+                opponentBoard: req.body.hostBoard,
+                turn: req.body.turn,
+                numShipsToPlaceHost: req.body.numShipsToPlaceOpponent,
+                numShipsToPlaceOpponent: req.body.numShipsToPlaceHost,
+                numHostLivesLeft: req.body.numOpponentLivesLeft,
+                numOpponentLivesLeft: req.body.numHostLivesLeft,
+            };
+        } else {
+            console.log("UPDATING BOTH BOARDS FROM OPPONENT");
+            gameStatus = {
+                hostBoard: req.body.opponentBoard,
+                opponentBoard: req.body.hostBoard,
+                turn: req.body.turn,
+                numShipsToPlaceHost: req.body.numShipsToPlaceOpponent,
+                numShipsToPlaceOpponent: req.body.numShipsToPlaceHost,
+                numHostLivesLeft: req.body.numOpponentLivesLeft,
+                numOpponentLivesLeft: req.body.numHostLivesLeft,
+            };
+        }
         await DB.storeGameStatus(req.body.gameID, gameStatus, opponentName);
+        res.status(204).send({ msg: "Game Status Updated in DB" });
     } else {
         res.status(401).send({ msg: 'You are not a player in this game' });
     }

@@ -102,42 +102,9 @@ async function storeGameStatus(gameID, currGameState, username) {
     console.log("GameID:", gameID);
 
     const filter = { gameID : gameID };
-    let gameState;
-    const hostname = currGameState.hostname;
-    const opponentName = currGameState.opponentName;
-    console.log("hostname:", hostname);
-    console.log("opponent name:", opponentName);
-    console.log("username:", username);
+    await gameCollection.updateOne(filter, { $set: currGameState });
 
-    if (username === hostname) {
-        console.log('Username matched with hostname');
-        gameState = {
-            hostBoard: currGameState.hostBoard,
-            opponentBoard: currGameState.opponentBoard,
-            turn: currGameState.turn,
-            numShipsToPlaceHost: currGameState.numShipsToPlaceHost,
-            numShipsToPlaceOpponent: currGameState.numShipsToPlaceOpponent,
-            numHostLivesLeft: currGameState.numHostLivesLeft,
-            numOpponentLivesLeft: currGameState.numOpponentLivesLeft,
-        };
-    } else if (username === opponentName) {
-        console.log('Username matched with opponentName');
-        gameState = {
-            hostBoard: currGameState.opponentBoard,
-            opponentBoard: currGameState.playerBoard,
-            turn: currGameState.turn,
-            numShipsToPlaceHost: currGameState.numShipsToPlaceOpponent,
-            numShipsToPlaceOpponent: currGameState.numShipsToPlaceHost,
-            numHostLivesLeft: currGameState.numOpponentLivesLeft,
-            numOpponentLivesLeft: currGameState.numHostLivesLeft,
-        };
-    }
-
-    console.log("Game State:", gameState);
-
-    await gameCollection.updateOne(filter, { $set: gameState });
-
-    return gameState;
+    return currGameState;
 }
 
 async function getUsersRecords(username) {
