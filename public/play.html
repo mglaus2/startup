@@ -27,30 +27,45 @@
     </header>
 
     <main>
-      <h1 id="username"></h1>
-      <div class = "grid-and-colors">
-        <div id="board" class="grid"></div>
-  
-        <div class="pick-colors">
-          <h3>Pick Colors:</h3>
-          <div>
-            <label for="openColor">Open Space Color:</label>
-            <input class="color-input" type="color" id="openColor" value="#1e3d59">
+      <!-- Display to set up connection to game -->
+      <div id="createGame" style="display: block">
+        <h1>Create or Join Game</h1>
+        <form>
+          <div class="form-input">
+            <label for="gameID">GameID:</label>
+            <input type="text" id="gameID" placeholder="Your GameID Here" required />
           </div>
-          <div>
-            <label for="shipColor">Sunk Ship Color:</label>
-            <input class="color-input" type="color" id="shipColor" value="#ffc13b">
+          <button type="button" class="btn btn-primary" onclick="handleFormSubmission()">Create or Join Game</button>
+        </form>
+      </div>
+
+      <!-- Display game after connection is made -->
+      <div id="playGame" style="display: none">
+        <h1 id="username"></h1>
+        <div class = "grid-and-colors">
+          <div id="board" class="grid"></div>
+    
+          <div class="pick-colors">
+            <h3>Pick Colors:</h3>
+            <div>
+              <label for="openColor">Open Space Color:</label>
+              <input class="color-input" type="color" id="openColor" value="#1e3d59">
+            </div>
+            <div>
+              <label for="shipColor">Sunk Ship Color:</label>
+              <input class="color-input" type="color" id="shipColor" value="#ffc13b">
+            </div>
+            <div>
+              <label for="hitColor">Hit Ship Color:</label>
+              <input class="color-input" type="color" id="hitColor" value="#ff6e40">
+            </div>
+            <div>
+              <label for="missColor">Miss Color:</label>
+              <input class="color-input" type="color" id="missColor" value="#593b1e">
+            </div>
+            <button id="generate-colors-button" class="btn btn-primary final">Generate Contrasting Color</button>
+            <button id="finalize-board-button" class="btn btn-primary final">Finalize Ship Placement</button>
           </div>
-          <div>
-            <label for="hitColor">Hit Ship Color:</label>
-            <input class="color-input" type="color" id="hitColor" value="#ff6e40">
-          </div>
-          <div>
-            <label for="missColor">Miss Color:</label>
-            <input class="color-input" type="color" id="missColor" value="#593b1e">
-          </div>
-          <button id="generate-colors-button" class="btn btn-primary final">Generate Contrasting Color</button>
-          <button id="finalize-board-button" class="btn btn-primary final">Finalize Ship Placement</button>
         </div>
       </div>
 
@@ -61,6 +76,18 @@
             <div class="modal-body">error message here</div>
             <div class="modal-footer">
               <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Connection dialog -->
+      <div class="modal fade" id="msgModalConnection" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content text-dark">
+            <div class="modal-body">error message here</div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-primary" data-bs-dismiss="modal" onclick="closeConnection()">Close Connection</button>
             </div>
           </div>
         </div>

@@ -3,8 +3,9 @@ const numRowsAndCols = 10;
 const finalizeBoardButton = document.getElementById('finalize-board-button');
 const generateColorButton = document.getElementById('generate-colors-button');
 
-const EstablishConnectionEvent = "establishConnection";
-const ErrorEvent = "error";
+const EstablishConnectionEvent = "establishingConnection";
+const ConnectionEstablishedEvent = "connectionEstablished";
+const ErrorHappenedEvent = "error";
 const MoveFinishedEvent = "moveFinished";
 const GameEndEvent = "gameEnd";
 
@@ -20,10 +21,20 @@ let numHostLivesLeft;
 let numOpponentLivesLeft;
 
 let socket;
+let connectionEstablished = false;
+
+(async () => {
+    if (connectionEstablished === true) {
+        setDisplay('createGame', 'none');
+        setDisplay('playGame', 'block');
+    } else {
+        setDisplay('createGame', 'block');
+        setDisplay('playGame', 'none');
+    }
+});
 
 async function init() {
-    await loadBoards();
-    configureWebSocket();
+    //configureWebSocket();
 }
 
 init();
@@ -42,6 +53,63 @@ missColorInput.addEventListener('input', handleColorChange);
 
 function createEmptyBoard() {
     return Array.from(Array(numRowsAndCols), () => new Array(numRowsAndCols).fill(0));
+}
+
+async function handleFormSubmission() {
+    const gameIDEl = document.getElementById('gameID');
+    const username = localStorage.getItem('username');
+    console.log(username);
+
+    if (!gameIDEl.value) {
+        alert("Please enter a GameID");
+        return;
+    }
+
+    gameID = gameIDEl.value;
+
+    // This is where the websocket would set up the connection and get opponents name
+    let opponentName;
+
+    const data = {
+        username: username,
+        gameID: gameIDEl.value,
+        opponentName: opponentName,
+    };
+
+    const response = await fetch('/api/game/join', {
+        method: 'POST',
+        headers: {'content-type': 'application/json'},
+        body: JSON.stringify(data),
+    }); 
+
+    const returnData = await response.json();
+
+    if(response.ok) {
+        console.log("GOOD RESPONSE");
+        storeGameStateLocal(returnData, gameIDEl.value);
+        configureWebSocket();
+    } else {
+        console.log("ERROR RESPONSE");
+        const modalEl = document.querySelector('#msgModal');
+        modalEl.querySelector('.modal-body').textContent = `⚠ Error: ${returnData.msg}`;
+        const msgModal = new bootstrap.Modal(modalEl, {});
+        msgModal.show();
+    }
+}
+
+function storeGameStateLocal(returnData, gameID, opponentName) {
+    const hostBoardString = JSON.stringify(returnData.hostBoard);
+    const opponentBoardString = JSON.stringify(returnData.opponentBoard);
+
+    localStorage.setItem('gameID', gameID);
+    localStorage.setItem('opponentName', opponentName);
+    localStorage.setItem('hostBoard', hostBoardString);
+    localStorage.setItem('opponentBoard', opponentBoardString);
+    localStorage.setItem('turn', returnData.turn);
+    localStorage.setItem('numShipsToPlaceHost', returnData.numShipsToPlaceHost);
+    localStorage.setItem('numShipsToPlaceOpponent', returnData.numShipsToPlaceOpponent);
+    localStorage.setItem('numHostLivesLeft', returnData.numHostLivesLeft);
+    localStorage.setItem('numOpponentLivesLeft', returnData.numOpponentLivesLeft);
 }
 
 function storeBoardsLocal() {
@@ -112,6 +180,9 @@ function retrieveBoardsLocal() {
 async function loadBoards() {
     username = localStorage.getItem('username');
     gameID = localStorage.getItem('gameID');
+
+    setDisplay('createGame', 'none');
+    setDisplay('playGame', 'block');
 
     const data = {
         gameID: gameID,
@@ -570,9 +641,16 @@ function displayMessage(message) {
     msgModal.show();
 }
 
+function displayConnectionMessage(message) {
+    const modalEl = document.querySelector('#msgModalConnection');
+    modalEl.querySelector('.modal-body').textContent = `${message}`;
+    const msgModal = new bootstrap.Modal(modalEl, {});
+    msgModal.show();
+}
+
 function configureWebSocket() {
     const protocol = window.location.protocol === 'http:' ? 'ws' : 'wss';
-    socket = new WebSocket(`${protocol}://${window.location.host}/ws/${gameID}`);
+    socket = new WebSocket(`${protocol}://${window.location.host}/${gameID}`);
 
     socket.onopen = (event) => {
         console.log("Connected to WebSocket");
@@ -583,8 +661,30 @@ function configureWebSocket() {
         console.log("Recieved message from websocket");
         const msg = JSON.parse(await event.data);
         console.log(msg.message);
-        if (msg.type === EstablishConnectionEvent || msg.type === ErrorEvent) {
+        if (msg.type === EstablishConnectionEvent || msg.type === ErrorHappenedEvent) {
+            displayConnectionMessage(msg.content);
+            //loadBoards();
+        } else if (msg.type === ConnectionEstablishedEvent) {
+            console.log("2 players connected");
+            connectionEstablished = true;
+            await loadBoards();
             displayMessage(msg.content);
         }
     }
+}
+
+function setDisplay(controlId, display) {
+    console.log(controlId);
+    const playControlEl = document.getElementById(`${controlId}`);
+    console.log('IN SET DISPLAY');
+    console.log(playControlEl);
+    if (playControlEl) {
+        console.log('Setting element display');
+        playControlEl.style.display = display;
+    }
+}
+
+function closeConnection() {
+    console.log("Close connection");
+    socket.close();
 }

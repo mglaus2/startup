@@ -29,19 +29,24 @@ function peerProxy(httpServer) {
             connections[gameID].push(connection);
 
             ws.send(JSON.stringify({ 
-                type: 'establishConnection', 
+                type: 'establishingConnection', 
                 content: `Waiting for another player to join... Have friend join Game ID ${gameID} to join!`,
             }));
         } else if (Object.keys(connections[gameID]).length < 2) {
             console.log("Second Player Connecting");
             connection = { id: uuid.v4(), alive: true, ws: ws };
             connections[gameID].push(connection);
+
+            ws.send(JSON.stringify({ 
+                type: 'connectionEstablished', 
+                content: `Connected with opponent!`,
+            }));
         } else {
             // Error, 2 players already connected: Send error message
             console.log("2 players are already connected");
             ws.send(JSON.stringify({ 
                 type: 'error', 
-                message: 'Two players are already connected to this game.' 
+                content: 'Two players are already connected to this game.' 
             }));
             ws.close();
 
@@ -49,24 +54,30 @@ function peerProxy(httpServer) {
         }
 
         ws.on('close', () => {
+            console.log('CLOSING CONNECTION');
             if (connections[gameID] && connection) {
-                delete connections[gameID][connection.id];
-                if (Object.keys(connections[gameID]).length === 0) {
-                    delete connections[gameID];
+                const index = connections[gameID].indexOf(connection);
+                if (index !== -1) {
+                    connections[gameID].splice(index, 1); // Remove the connection from the array
+                    console.log(connections[gameID]);
+                    if (connections[gameID].length === 0) {
+                        console.log("Removing map key value");
+                        delete connections[gameID];
+                    }
                 }
             }
         });
 
         // Respond to pong messages by marking the connection alive
         ws.on('pong', () => {
-            console.log("PONG");
+            //console.log("PONG");
             connection.alive = true;
         });
     });
 
     // Keep active connections alive
     setInterval(() => {
-        console.log("PING");
+        //console.log("PING");
         Object.values(connections).forEach((gameConnections) => {
             Object.values(gameConnections).forEach((connection) => {
                 // Kill any connection that didn't respond to the ping last time
