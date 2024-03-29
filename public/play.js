@@ -26,6 +26,7 @@ let socket;
 let isHost;
 let connectionMessage;
 let message;
+let firstTurn = true;
 let connectionEstablished = false;
 let opponentBoardFinished = false;
 
@@ -168,7 +169,7 @@ function retrieveBoardsLocal() {
     numHostLivesLeft = parseInt(localStorage.getItem(`numHostLivesLeft`));
     numOpponentLivesLeft = parseInt(localStorage.getItem(`numOpponentLivesLeft`));
 
-    displayBoardLogic(true);
+    displayBoardLogic(true, true);
 }
 
 async function loadBoards() {
@@ -201,22 +202,25 @@ async function loadBoards() {
         numOpponentLivesLeft = returnData.numOpponentLivesLeft;
 
         let isTurn;
-        if (opponentName === username) {
+        if (isHost) {
+            if (turn === "Host") {
+                isTurn = true;
+            } else {
+                isTurn = false;
+            }
+        } else {
             if (turn === "Host") {
                 // opponents turn
                 isTurn = false;
             } else {
                 isTurn = true;
             }
-        } else {
-            if (turn === "Host") {
-                isTurn = true;
-            } else {
-                isTurn = false;
-            }
         }
 
-        displayBoardLogic(isTurn);
+        if (firstTurn) {
+            console.log("Displaying board from DB");
+            displayBoardLogic(isTurn, true);
+        }
         console.log('Retrieved Boards from Server');
 
         // SAVE SCORES IF WE GO OFFLINE
@@ -227,19 +231,30 @@ async function loadBoards() {
     }
 }
 
-function displayBoardLogic(currTurn) {
+function displayBoardLogic(currTurn, fromServer) {
+    console.log(turn);
     if (turn === 'Placing Ships') {
         playerNameEl.textContent = username + '\'s Board';
         displayBoard(playerBoard, 'board', handlePlayerCellClickPlacingShips);
     } else if (currTurn) {
+        console.log("YOUR TURN");
         playerNameEl.textContent = opponentName + '\'s Board';
         //finalizeBoardButton.parentNode.removeChild(finalizeBoardButton);
-        if (numHostLivesLeft === 0 || numOpponentLivesLeft=== 0) {
+        if (numHostLivesLeft === 0 || numOpponentLivesLeft === 0) {
+            console.log("GAME FINISHED");
             displayBoard(opponentBoard, 'board');
         } else {
+            console.log("Can Guess");
+            if (!firstTurn && !fromServer) {
+                message = displayMessage("It is your turn! Make a guess!");
+            } else {
+                firstTurn = false;
+            }
+
             displayBoard(opponentBoard, 'board', handlePlayerCellClickGuess);
         }
     } else if(!currTurn) {
+        console.log("OPPONENTS TURN");
         playerNameEl.textContent = username + '\'s Board';
         //finalizeBoardButton.parentNode.removeChild(finalizeBoardButton);
         if(numHostLivesLeft === 0) {
@@ -257,6 +272,12 @@ function displayBoardLogic(currTurn) {
         } 
         else {
             console.log("Displaying own board");
+            if (!firstTurn && !fromServer) {
+                message = displayMessage("Opponents Turn. Wait for them to finish.");
+            } else {
+                firstTurn = false;
+            }
+
             displayBoard(playerBoard, 'board');
         }
     }
@@ -326,44 +347,43 @@ function handlePlayerCellClickGuess(event) {
     const row = Math.floor(position / numRowsAndCols);
     const col = position % numRowsAndCols;
 
-    if (turn === "Host") {
-        if(opponentBoard[row][col] === 1 || opponentBoard[row][col] === 2 || opponentBoard[row][col] === 3) {
-            message = displayMessage("Invalid Guess.");
-        } else if (opponentBoard[row][col] === 4) {
-            turn = "Opponent";
-            opponentBoard[row][col] = 2;
-            --numOpponentLivesLeft;
-            let tempMatrix = createEmptyBoard();
-            console.log("CHECKING IF SUNK");
-            if(checkIfSunk(row, col, tempMatrix, true, opponentBoard)) {
-                displayBoard(opponentBoard, 'board', handlePlayerCellClickGuess);
-                setTimeout(() => {
-                    if (numOpponentLivesLeft === 0) {
-                        message = displayMessage("YOU WON!");
-                        storeResults(username);
-                        displayBoard(opponentBoard, 'board');
-                    } else {
-                        simulateOpponentGuess();
-                    }
-                }, 1000);
-            } else {
-                updateCellAppearanceOpponent(event.target, opponentBoard[row][col]);
-                saveGameState();
-                setTimeout(() => {
-                    simulateOpponentGuess();
-                }, 1000);
-            }
-        } else {
-            turn = "Opponent";
-            opponentBoard[row][col] = 1;
-            updateCellAppearanceOpponent(event.target, opponentBoard[row][col]);
-
-            saveGameState();
-
+    if(opponentBoard[row][col] === 1 || opponentBoard[row][col] === 2 || opponentBoard[row][col] === 3) {
+        message = displayMessage("Invalid Guess.");
+    } else if (opponentBoard[row][col] === 4) {
+        turn = "Opponent";
+        opponentBoard[row][col] = 2;
+        --numOpponentLivesLeft;
+        let tempMatrix = createEmptyBoard();
+        console.log("CHECKING IF SUNK");
+        if(checkIfSunk(row, col, tempMatrix, true, opponentBoard)) {
+            displayBoard(opponentBoard, 'board', handlePlayerCellClickGuess);
             setTimeout(() => {
-                simulateOpponentGuess();
+                if (numOpponentLivesLeft === 0) {
+                    message = displayMessage("YOU WON!");
+                    storeResults(username);
+                    displayBoard(opponentBoard, 'board');
+                } else {
+                    saveGameState();
+                    sendMoveFinishedEvent();
+                }
+            }, 1000);
+        } else {
+            updateCellAppearanceOpponent(event.target, opponentBoard[row][col]);
+            saveGameState();
+            setTimeout(() => {
+                sendMoveFinishedEvent();
             }, 1000);
         }
+    } else {
+        turn = "Opponent";
+        opponentBoard[row][col] = 1;
+        updateCellAppearanceOpponent(event.target, opponentBoard[row][col]);
+
+        saveGameState();
+
+        setTimeout(() => {
+            sendMoveFinishedEvent();
+        }, 1000);
     }
 }
 
@@ -429,7 +449,7 @@ finalizeBoardButton.addEventListener('click', () => {
         }
 
         playerNameEl.textContent = opponentName + '\'s Board';
-        displayBoard(playerBoard, 'board');
+        //displayBoard(playerBoard, 'board');
         finalizeBoardButton.parentNode.removeChild(finalizeBoardButton);
         saveGameState();
         boardFinalized();
@@ -442,8 +462,10 @@ function displayStartGameMessage() {
     turn = "Host";
     if (isHost) {
         message = displayMessage("Board Finalized! It is your turn! Make a guess!");
+        displayBoardLogic(true, true);
     } else {
-        message = displayMessage("Board Finalized! Opponents Turn. Wait for them to finish.")
+        message = displayMessage("Board Finalized! Opponents Turn. Wait for them to finish.");
+        displayBoardLogic(false, true);
     }
 }
 
@@ -699,26 +721,45 @@ function configureWebSocket() {
                 connectionMessage.hide();
             }
             await loadBoards();
-            message = displayMessage(msg.content);
+            //message = displayMessage(msg.content);
         } else if (msg.type === BoardFinalizedEvent) {
             opponentBoardFinished = true;
+
+            setTimeout(async () => {
+                await loadBoards();
+                console.log("After loading boards", opponentBoard);
+            }, 2000);
         } else if (msg.type === StartGameEvent) {
             // implement where to start game
             if(message) {
                 message.hide();
             }
 
+            setTimeout(async () => {
+                await loadBoards();
+                console.log("After loading boards", opponentBoard);
+            }, 2000);
+
             if (isHost) {
                 // your turn and send response everytime it says simulate opponent guess
                 message = displayMessage("It is your turn! Make a guess!");
-                displayBoardLogic(true);
+                displayBoardLogic(true, false);
             } else {
                 // wait for your turn by waiting for message and not letting user touch board
                 message = displayMessage("Opponents Turn. Wait for them to finish.");
-                displayBoardLogic(false);
+                displayBoardLogic(false, false);
             }
         } else if (msg.type === MoveFinishedEvent) {
-
+            setTimeout(async () => {
+                await loadBoards();
+                console.log("After loading boards", opponentBoard);
+                displayBoard(playerBoard, 'board');
+                
+                setTimeout(() => {
+                    displayBoard(playerBoard, 'board');
+                    displayBoardLogic(true, false);
+                }, 3000); 
+            }, 2000);
         }
     }
 }
@@ -739,6 +780,15 @@ function boardFinalized() {
     }
 
     socket.send(JSON.stringify(event));
+}
+
+function sendMoveFinishedEvent() {
+    const event = {
+        type: MoveFinishedEvent,
+    };
+
+    socket.send(JSON.stringify(event));
+    displayBoardLogic(false, false);
 }
 
 function setDisplay(controlId, display) {
