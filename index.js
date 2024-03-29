@@ -86,9 +86,9 @@ apiRouter.use(secureApiRouter);
 secureApiRouter.use(async (req, res, next) => {
     console.log("Checking authtoken");
     authToken = req.cookies[authCookieName];
-    console.log("Authtoken:", authToken);
+    //console.log("Authtoken:", authToken);
     const user = await DB.getUserByToken(authToken);
-    console.log("User:", user);
+    //console.log("User:", user);
     if (user) {
       next();
     } else {
@@ -101,8 +101,8 @@ secureApiRouter.post('/game/join', async (req, res) => {
     let gameState = await DB.getGame(req.body.gameID);
     if (gameState) {
         console.log('Joining Game with GameID:', req.body.gameID);
-        console.log('Hostname', gameState.hostname);
-        console.log('Username:', req.body.username);
+        //console.log('Hostname', gameState.hostname);
+        //console.log('Username:', req.body.username);
         const hostname = gameState.hostname;
         const opponentName = gameState.opponentName;
         const username = req.body.username;
@@ -154,12 +154,12 @@ secureApiRouter.post('/game/storeStatus', async (req, res) => {
     const hostname = gameState.hostname;
     const opponentName = gameState.opponentName;
     const username = req.body.hostname;
-    console.log('Username:', username);
-    console.log('Hostname:', hostname);
-    console.log('Opponent name:', opponentName);
+    //console.log('Username:', username);
+    //console.log('Hostname:', hostname);
+    //console.log('Opponent name:', opponentName);
 
-    console.log("ALLLLLLEEEEERRRRRTTTT", gameState);
-    console.log(req.body);
+    //console.log("ALLLLLLEEEEERRRRRTTTT", gameState);
+    //console.log(req.body);
     if(username === hostname) {
         await DB.storeGameStatus(req.body.gameID, req.body, username);
         res.status(204).send({ msg: "Game Status Updated in DB" });
@@ -186,8 +186,8 @@ secureApiRouter.post('/game/getStatus', async (req, res) => {
     const gameState = await DB.getGame(req.body.gameID);
     if (gameState) {
         console.log('Getting Status with GameID:', req.body.gameID);
-        console.log('Hostname', gameState.hostname);
-        console.log('Username:', req.body.username);
+        //console.log('Hostname', gameState.hostname);
+        //console.log('Username:', req.body.username);
         const hostname = gameState.hostname;
         const opponentName = gameState.opponentName;
         const username = req.body.username;
@@ -224,9 +224,9 @@ secureApiRouter.post('/game/getStatus', async (req, res) => {
 
 secureApiRouter.post('/records/insert', async (req, res) => {
     console.log("Inserting record");
-    console.log("Username:", req.body.username);
-    console.log("Opponent Name:", req.body.opponentName);
-    console.log("Winner:", req.body.winner);
+    //console.log("Username:", req.body.username);
+    //console.log("Opponent Name:", req.body.opponentName);
+    //console.log("Winner:", req.body.winner);
 
     const record = await DB.insertRecord(req.body.username, req.body.opponentName, req.body.winner);
 
@@ -266,7 +266,7 @@ function setAuthCookie(res, authToken) {
     });
 }
 
-app.listen(port, () => {
+const httpService = app.listen(port, () => {
     console.log(`Listening on port ${port}`);
 });
 

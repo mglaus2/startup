@@ -3,6 +3,11 @@ const numRowsAndCols = 10;
 const finalizeBoardButton = document.getElementById('finalize-board-button');
 const generateColorButton = document.getElementById('generate-colors-button');
 
+const EstablishConnectionEvent = "establishConnection";
+const ErrorEvent = "error";
+const MoveFinishedEvent = "moveFinished";
+const GameEndEvent = "gameEnd";
+
 let username;
 let opponentName;
 let playerBoard;
@@ -568,4 +573,18 @@ function displayMessage(message) {
 function configureWebSocket() {
     const protocol = window.location.protocol === 'http:' ? 'ws' : 'wss';
     socket = new WebSocket(`${protocol}://${window.location.host}/ws/${gameID}`);
+
+    socket.onopen = (event) => {
+        console.log("Connected to WebSocket");
+        //displayMessage("Connected to WebSocket");
+    }
+
+    socket.onmessage = async (event) => {
+        console.log("Recieved message from websocket");
+        const msg = JSON.parse(await event.data);
+        console.log(msg.message);
+        if (msg.type === EstablishConnectionEvent || msg.type === ErrorEvent) {
+            displayMessage(msg.content);
+        }
+    }
 }

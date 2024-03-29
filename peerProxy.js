@@ -17,17 +17,28 @@ function peerProxy(httpServer) {
 
     wss.on('connection', (ws, req) => {
         const gameID = req.url.substring(1);
+        console.log('Connected to game with ID:', gameID);
+
         let connection;
+        console.log("Connected Sockets:", connections[gameID]);
 
         if (!connections[gameID]) {
+            console.log("Creating new dict to connect");
             connection = { id: uuid.v4(), alive: true, ws: ws };
             connections[gameID] = [];
             connections[gameID].push(connection);
+
+            ws.send(JSON.stringify({ 
+                type: 'establishConnection', 
+                content: `Waiting for another player to join... Have friend join Game ID ${gameID} to join!`,
+            }));
         } else if (Object.keys(connections[gameID]).length < 2) {
+            console.log("Second Player Connecting");
             connection = { id: uuid.v4(), alive: true, ws: ws };
             connections[gameID].push(connection);
         } else {
             // Error, 2 players already connected: Send error message
+            console.log("2 players are already connected");
             ws.send(JSON.stringify({ 
                 type: 'error', 
                 message: 'Two players are already connected to this game.' 
@@ -48,12 +59,14 @@ function peerProxy(httpServer) {
 
         // Respond to pong messages by marking the connection alive
         ws.on('pong', () => {
+            console.log("PONG");
             connection.alive = true;
         });
     });
 
     // Keep active connections alive
     setInterval(() => {
+        console.log("PING");
         Object.values(connections).forEach((gameConnections) => {
             Object.values(gameConnections).forEach((connection) => {
                 // Kill any connection that didn't respond to the ping last time
