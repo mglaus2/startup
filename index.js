@@ -174,8 +174,6 @@ secureApiRouter.post('/game/storeStatus', async (req, res) => {
     //console.log('Hostname:', hostname);
     //console.log('Opponent name:', opponentName);
 
-    //console.log("ALLLLLLEEEEERRRRRTTTT", gameState);
-    //console.log(req.body);
     if(username === hostname) {
         if (req.body.numShipsToPlaceOpponent === 10) {
             console.log("ONLY UPDATING HOSTS BOARD");

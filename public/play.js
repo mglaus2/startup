@@ -9,7 +9,6 @@ const ErrorHappenedEvent = "error";
 const BoardFinalizedEvent = "boardFinalized";
 const StartGameEvent = "startGame";
 const MoveFinishedEvent = "moveFinished";
-const GameEndEvent = "gameEnd";
 
 let username;
 let opponentName;
@@ -222,6 +221,9 @@ async function loadBoards() {
         }
 
         if (firstTurn) {
+            if (numShipsToPlaceHost === 0) {
+                finalizeBoardButton.parentNode.removeChild(finalizeBoardButton);
+            }
             console.log("Displaying board from DB");
             displayBoardLogic(isTurn, true);
         }
@@ -238,11 +240,11 @@ async function loadBoards() {
 function displayBoardLogic(currTurn, fromServer) {
     console.log(turn);
     if (turn === 'Placing Ships') {
-        playerNameEl.textContent = username + '\'s Board';
+        playerNameEl.textContent = username + '\'s Board at GameID: ' + gameID;
         displayBoard(playerBoard, 'board', handlePlayerCellClickPlacingShips);
     } else if (currTurn) {
         console.log("YOUR TURN");
-        playerNameEl.textContent = opponentName + '\'s Board';
+        playerNameEl.textContent = opponentName + '\'s Board at GameID: ' + gameID;
         //finalizeBoardButton.parentNode.removeChild(finalizeBoardButton);
         if (numHostLivesLeft === 0 || numOpponentLivesLeft === 0) {
             console.log("GAME FINISHED");
@@ -267,7 +269,7 @@ function displayBoardLogic(currTurn, fromServer) {
         }
     } else if(!currTurn) {
         console.log("OPPONENTS TURN");
-        playerNameEl.textContent = username + '\'s Board';
+        playerNameEl.textContent = username + '\'s Board at GameID: ' + gameID;
         //finalizeBoardButton.parentNode.removeChild(finalizeBoardButton);
         if(numHostLivesLeft === 0) {
             console.log("GAME OVER");
@@ -377,7 +379,7 @@ function handlePlayerCellClickGuess(event) {
         let tempMatrix = createEmptyBoard();
         console.log("CHECKING IF SUNK");
         if(checkIfSunk(row, col, tempMatrix, true, opponentBoard)) {
-            displayBoard(opponentBoard, 'board', handlePlayerCellClickGuess);
+            displayBoard(opponentBoard, 'board');
             setTimeout(() => {
                 if (numOpponentLivesLeft === 0) {
                     message = displayMessage("YOU WON!");
@@ -391,6 +393,7 @@ function handlePlayerCellClickGuess(event) {
             }, 1000);
         } else {
             updateCellAppearanceOpponent(event.target, opponentBoard[row][col]);
+            displayBoard(opponentBoard, 'board');
             saveGameState();
             setTimeout(() => {
                 sendMoveFinishedEvent();
@@ -404,6 +407,7 @@ function handlePlayerCellClickGuess(event) {
         }
         opponentBoard[row][col] = 1;
         updateCellAppearanceOpponent(event.target, opponentBoard[row][col]);
+        displayBoard(opponentBoard, 'board');
 
         saveGameState();
 
@@ -544,7 +548,7 @@ function checkIfSunk(row, col, tempMatrix, firstIteration, board) {
 // will get opponents guess through web socket instead of simulation
 function simulateOpponentGuess() {
     console.log("SIMULATING OPPONENT");
-    playerNameEl.textContent = username + '\'s Board';
+    playerNameEl.textContent = username + '\'s Board at GameID: ' + gameID;
     displayBoard(playerBoard, 'board');
     const row = Math.floor(Math.random() * numRowsAndCols);
     const col = Math.floor(Math.random() * numRowsAndCols);
@@ -581,7 +585,7 @@ function simulateOpponentGuess() {
     }
 
     setTimeout(() => {
-        playerNameEl.textContent = opponentName + '\'s Board';
+        playerNameEl.textContent = opponentName + '\'s Board at GameID: ' + gameID;
         displayBoard(opponentBoard, 'board', handlePlayerCellClickGuess);
     }, 5000);
 
@@ -709,25 +713,21 @@ generateColorButton.addEventListener('click', () => {
 });
 
 function displayMessage(newMessage) {
-    if (message) {
-        message.hide();
-        
-        setTimeout(() => {
-            const modalEl = document.querySelector('#msgModal');
-            modalEl.querySelector('.modal-body').textContent = `${newMessage}`;
-            const msgModal = new bootstrap.Modal(modalEl, {});
-            msgModal.show();
+    const modalEl = document.querySelector('#msgModal');
+    const message = modalEl.querySelector('.modal-body');
 
-            return msgModal;
-        }, 1000);
+    // Check if the modal is already shown
+    if (msgModal && msgModal._isShown) {
+        // Update the text content of the message
+        message.textContent = newMessage;
     } else {
-        const modalEl = document.querySelector('#msgModal');
-        modalEl.querySelector('.modal-body').textContent = `${newMessage}`;
-        const msgModal = new bootstrap.Modal(modalEl, {});
+        // Create a new modal instance
+        message.textContent = newMessage;
+        msgModal = new bootstrap.Modal(modalEl, {});
         msgModal.show();
-
-        return msgModal;
     }
+
+    return msgModal;
 }
 
 function displayConnectionMessage(message) {
@@ -770,23 +770,19 @@ function configureWebSocket() {
                 console.log("After loading boards", opponentBoard);
             }, 2000);
         } else if (msg.type === StartGameEvent) {
-            // implement where to start game
-            if(message) {
-                message.hide();
-            }
-
             setTimeout(async () => {
+                firstTurn = false;
                 await loadBoards();
                 console.log("After loading boards", opponentBoard);
             }, 2000);
 
             if (isHost) {
-                // your turn and send response everytime it says simulate opponent guess
-                message = displayMessage("It is your turn to start the game! Make a guess!");
+                turn = "Host";
+                firstTurn = false;
                 displayBoardLogic(true, false);
             } else {
-                // wait for your turn by waiting for message and not letting user touch board
-                message = displayMessage("Opponents Turn to start the game. Wait for them to finish.");
+                turn = "Host";
+                firstTurn = false;
                 displayBoardLogic(false, false);
             }
         } else if (msg.type === MoveFinishedEvent) {
