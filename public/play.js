@@ -244,7 +244,6 @@ function displayBoardLogic(currTurn, fromServer) {
         displayBoard(playerBoard, 'board', handlePlayerCellClickPlacingShips);
     } else if (currTurn) {
         console.log("YOUR TURN");
-        playerNameEl.textContent = opponentName + '\'s Board at GameID: ' + gameID;
         //finalizeBoardButton.parentNode.removeChild(finalizeBoardButton);
         if (numHostLivesLeft === 0 || numOpponentLivesLeft === 0) {
             console.log("GAME FINISHED");
@@ -253,6 +252,7 @@ function displayBoardLogic(currTurn, fromServer) {
                 message = displayMessage("You lost this game!");
             }, 1000);
         } else {
+            playerNameEl.textContent = opponentName + '\'s Board at GameID: ' + gameID;
             console.log("Can Guess");
             if (!firstTurn && !fromServer) {
                 console.log("Not first and not from server");
@@ -269,7 +269,6 @@ function displayBoardLogic(currTurn, fromServer) {
         }
     } else if(!currTurn) {
         console.log("OPPONENTS TURN");
-        playerNameEl.textContent = username + '\'s Board at GameID: ' + gameID;
         //finalizeBoardButton.parentNode.removeChild(finalizeBoardButton);
         if(numHostLivesLeft === 0) {
             console.log("GAME OVER");
@@ -278,6 +277,7 @@ function displayBoardLogic(currTurn, fromServer) {
                 message = displayMessage("You lost this game!");
             }, 1000);
         } else if(numOpponentLivesLeft === 0) {
+            playerNameEl.textContent = username + '\'s Board at GameID: ' + gameID;
             console.log('YOU WON THIS GAME');
             displayBoard(opponentBoard, 'board');
             setTimeout(() => {
@@ -285,6 +285,7 @@ function displayBoardLogic(currTurn, fromServer) {
             }, 1000);
         } 
         else {
+            playerNameEl.textContent = username + '\'s Board at GameID: ' + gameID;
             console.log("Displaying own board");
             if (!firstTurn && !fromServer) {
                 console.log("Not first and not from server");
