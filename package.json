@@ -16,5 +16,8 @@
     "mongodb": "^6.5.0",
     "uuid": "^9.0.1",
     "ws": "^8.16.0"
+  },
+  "devDependencies": {
+    "vite": "^5.2.9"
   }
 }
