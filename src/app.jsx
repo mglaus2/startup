@@ -3,10 +3,15 @@ import { BrowserRouter, NavLink, Route, Routes } from 'react-router-dom';
 import { Login } from './login/login';
 import { Play } from './play/play';
 import { Leaderboard } from './leaderboard/leaderboard';
+import { AuthState } from './login/authState';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './app.css';
 
 export default function App() {
+  const [username, setUsername] = React.useState(localStorage.getItem('username') || '');
+  const currentAuthState = username ? AuthState.Authenticated : AuthState.Unauthenticated;
+  const [authState, setAuthState] = React.useState(currentAuthState);
+
   return (
     <BrowserRouter>
       <div className="body">
@@ -22,7 +27,18 @@ export default function App() {
         </header>
 
         <Routes>
-          <Route path='/' element={<Login />} exact />
+          <Route path='/' element={
+            <Login 
+              username={username}
+              authState={authState}
+              onAuthChange={(username, authState) => {
+                setAuthState(authState);
+                setUsername(username);
+              }}
+            />
+          } 
+          exact 
+          />
           <Route path='/play' element={<Play />} />
           <Route path='/leaderboard' element={<Leaderboard />} />
           <Route path='*' element={<NotFound />} />
