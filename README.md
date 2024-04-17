@@ -95,3 +95,13 @@ For this deliverable I built out the structure of my application using HTML.
 [x] - done - Frontend makes WebSocket connection. Frontend makes websocket connections in the play page.  
 [x] - done - Data sent over WebSocket connection. Data is sent between the backend and the 2 users of a game to update the game status. Only 2 users can connect to 1 game but those users can reconnect and the progress of the game continues after reconnection. Multiple games can be played at once between different users.  
 [x] - done - WebSocket data displayed in the application interface. The message if a connection can be made (already 2 users connected to game) or if the user is waiting for another player to join (only 1 connection to game when being created) is displayed when inserting a gameID in the play page. Then the messages that are sent to and from the 2 users in a game are letting the frontend know when to pull data about the game state from the database by the message type. I thought this was a good path since the game states were already being stored in the database.  
+
+## React Deliverable
+[x] - done - Prerequisite: Simon Login deployed to your production environment with your dbConfig.json credentials.   
+[x] - done - Prerequisite: A link to your GitHub startup repository prominently displayed on your application's home page.  
+[x] - done - Prerequisite: Notes in your startup Git repository README.md file.  
+[x] - done - Prerequisite: At least 10 git commits spread consistently throughout the assignment period. 
+[x] - done - Bundled using Vite. Done!  
+[] - done - Multiple functional react components.
+[x] - done - React router. Routing between login, play, and leaderboard components in app.jsx file.  
+[x] - done - React hooks. Use of React hooks in login process using useState (unauthenticated.jsx) and leaderboard uses useState and useEffect (leaderboard.jsx) to track changes and update UI based on changes.  
