@@ -1,0 +1,42 @@
+main {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.username {
+    margin-bottom: 3vh;
+}
+
+.overall-record {
+    margin-bottom: 1vh;
+}
+
+table {
+    max-width: 600px;
+}
+
+/* sets the header color */
+body .container-fluid .table .custom-row {
+    --bs-table-bg: #1e3d59;
+}
+
+td {
+    border: 1px solid black;
+    padding: 8px;
+}
+
+th {
+    border: 1px solid black;
+    color: #ffc13b;
+    padding: 8px;
+}
+
+.table .custom-header {
+    color: #ffc13b;
+}
+
+.record-row {
+    --bs-body-bg: #e5e5dc;
+}

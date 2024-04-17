@@ -20,8 +20,20 @@ export default function App() {
             <NavLink className="navbar-brand" to="">Battleship</NavLink>
             <menu className="navbar-nav">
               <li className="nav-item"><NavLink className="nav-link" to="">Home</NavLink></li>
-              <li className="nav-item"><NavLink className="nav-link" to="play">Current Game</NavLink></li>
-              <li className="nav-item"><NavLink className="nav-link active" to="leaderboard">Leaderboard</NavLink></li>
+              {authState === AuthState.Authenticated && (
+                <li className='nav-item'>
+                  <NavLink className='nav-link' to='play'>
+                    Play
+                  </NavLink>
+                </li>
+              )}
+              {authState === AuthState.Authenticated && (
+                <li className='nav-item'>
+                  <NavLink className='nav-link' to='leaderboard'>
+                    Leaderboard
+                  </NavLink>
+                </li>
+              )}
             </menu>
           </nav>
         </header>
@@ -40,7 +52,7 @@ export default function App() {
           exact 
           />
           <Route path='/play' element={<Play />} />
-          <Route path='/leaderboard' element={<Leaderboard />} />
+          <Route path='/leaderboard' element={<Leaderboard username={username} />} />
           <Route path='*' element={<NotFound />} />
         </Routes>
 
