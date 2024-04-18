@@ -102,6 +102,6 @@ For this deliverable I built out the structure of my application using HTML.
 [x] - done - Prerequisite: Notes in your startup Git repository README.md file.  
 [x] - done - Prerequisite: At least 10 git commits spread consistently throughout the assignment period.  
 [x] - done - Bundled using Vite. Done!  
-[x] - done - Multiple functional react components. I was able to fully create the components for login, create/join game, and leaderboard. I had trouble implementing all of the game logic for playing battleship (play-game.jsx) in React but I established a framework that can be worked on. Updating the colors works and generating constrasting colors works, you just cannot interact with the board.  
+[x] - done - Multiple functional react components. I was able to fully create the components for login, create/join game, and leaderboard. I had trouble implementing all of the game logic for playing battleship (play-game.jsx) in React but I established a framework that can be worked on. Updating the colors works and generating constrasting colors works, you just cannot interact with the board. If you need a user to see how the leaderboard works (username: a, password: a) has entries in the database.  
 [x] - done - React router. Routing between login, play, and leaderboard components in app.jsx file.  
 [x] - done - React hooks. Use of React hooks in login process using useState (unauthenticated.jsx), play process using useState, and leaderboard uses useState and useEffect (leaderboard.jsx) to track changes and update UI based on changes.  
