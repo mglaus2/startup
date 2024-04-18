@@ -13,7 +13,6 @@ export function PlayGame(props) {
     const [missColor, setMissColor] = React.useState("#593b1e");
 
     const [playerBoard, setPlayerBoard] = React.useState(createEmptyBoard());
-    const [boardChanged, setBoardChanged] = React.useState(false);
 
     function createEmptyBoard() {
         return Array.from(Array(10), () => new Array(10).fill(0));
@@ -61,7 +60,6 @@ export function PlayGame(props) {
         }
     
         setPlayerBoard(updatedBoard);
-        setBoardChanged(prev => !prev);
     }
 
     async function generateColors() {
@@ -132,11 +130,9 @@ export function PlayGame(props) {
                         <input className="color-input" type="color" id="missColor" value={missColor} onChange={(e) => setMissColor(e.target.value)}/>
                     </div>
                     <Button id="generate-colors-button" className="btn btn-primary final" onClick={() => generateColors()}>Generate Contrasting Color</Button>
-                    <Button id="finalize-board-button" className="btn btn-primary final">Finalize Ship Placement</Button>
                 </div>
                 </div>
             </div>
-
         </>
     );
 }
