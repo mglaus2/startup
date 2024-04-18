@@ -61,6 +61,7 @@ export default function App() {
           <Route path='/play' element={
             <Play 
               username={username}
+              gameID={gameID}
               gameState={gameState}
               onGameChange={(gameID, gameState) => {
                 setGameState(gameState);
