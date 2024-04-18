@@ -28,12 +28,19 @@ main form {
     flex-direction: column;
     align-items: center;
 }
+.container {
+    margin-top: 2vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
 
 .form-input {
     margin-bottom: 1vh;
 }
 
 .buttons {
+    margin-top: 1vh;
     display: flex;
     flex-direction: row;
     align-items: center;

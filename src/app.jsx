@@ -1,9 +1,10 @@
 import React from 'react';
 import { BrowserRouter, NavLink, Route, Routes } from 'react-router-dom';
 import { Login } from './login/login';
-import { Play } from './play';
+import { Play } from './play/play';
 import { Leaderboard } from './leaderboard/leaderboard';
 import { AuthState } from './login/authState';
+import { GameState } from './play/gameState';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './app.css';
 
@@ -11,6 +12,10 @@ export default function App() {
   const [username, setUsername] = React.useState(localStorage.getItem('username') || '');
   const currentAuthState = username ? AuthState.Authenticated : AuthState.Unauthenticated;
   const [authState, setAuthState] = React.useState(currentAuthState);
+
+  const [gameID, setGameID] = React.useState(localStorage.getItem('gameID') || '');
+  const currentGameState = gameID ? GameState.InGame : GameState.JoinGame;
+  const [gameState, setGameState] = React.useState(currentGameState);
 
   return (
     <BrowserRouter>
@@ -38,7 +43,7 @@ export default function App() {
           </nav>
         </header>
 
-        <Routes>
+        <Routes className="content">
           <Route path='/' element={
             <Login 
               username={username}
@@ -46,12 +51,25 @@ export default function App() {
               onAuthChange={(username, authState) => {
                 setAuthState(authState);
                 setUsername(username);
+                setGameID('');
+                setGameState(GameState.JoinGame);
               }}
             />
           } 
           exact 
           />
-          <Route path='/play' element={<Play username={username} />} />
+          <Route path='/play' element={
+            <Play 
+              username={username}
+              gameState={gameState}
+              onGameChange={(gameID, gameState) => {
+                setGameState(gameState);
+                setGameID(gameID);
+              }}
+            />
+          } 
+          exact
+          />
           <Route path='/leaderboard' element={<Leaderboard username={username} />} />
           <Route path='*' element={<NotFound />} />
         </Routes>
