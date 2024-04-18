@@ -100,7 +100,7 @@ For this deliverable I built out the structure of my application using HTML.
 [x] - done - Prerequisite: Simon Login deployed to your production environment with your dbConfig.json credentials.   
 [x] - done - Prerequisite: A link to your GitHub startup repository prominently displayed on your application's home page.  
 [x] - done - Prerequisite: Notes in your startup Git repository README.md file.  
-[x] - done - Prerequisite: At least 10 git commits spread consistently throughout the assignment period. 
+[x] - done - Prerequisite: At least 10 git commits spread consistently throughout the assignment period.  
 [x] - done - Bundled using Vite. Done!  
 [x] - done - Multiple functional react components. I was able to fully create the components for login, create/join game, and leaderboard. I had trouble implementing all of the game logic for playing battleship (play-game.jsx) in React but I established a framework that can be worked on. Updating the colors works and generating constrasting colors works, you just cannot interact with the board.  
 [x] - done - React router. Routing between login, play, and leaderboard components in app.jsx file.  
